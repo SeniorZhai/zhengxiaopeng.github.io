@@ -1,0 +1,699 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="baidu-site-verification" content="WG8fZ2mGXA" />
+  <meta name="baidu_union_verify" content="d1952c66cf48912e21c18c7c581f382a">
+  <meta name="360-site-verification" content="67fbcc5a67f4c65c057315b28fa0b2c8" />
+  <meta name="google-site-verification" content="J7ONClDGsj92njCYAloRwEkDpz94YUFUxgi76g1m4Lk" />
+  
+    <title>运算符的几点 | Rocko&#39;s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="Rocko">
+    
+    <meta name="description" content="开篇废话
+运算符使用的几点小技巧，先给出Java的运算符的基本知识复习下，其它语言的大同小异。运算符需要注意的问题有：优先级（运算顺序问题）、结合方向（自左至右或自右至左问题）、要求运算对象个数（运算符需要有几个运算对象问题）。合理运用运算符能提高自己代码的BIG、能精简代码、还能提高程序的运行效率">
+    
+    
+    
+    
+    <link rel="alternate" href="/atom.xml" title="Rocko&#39;s blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            var _bdId ='c16c4e2dd9b9bdcefb419ffec7adb092';
+             hm.src = "//hm.baidu.com/hm.js?" + _bdId;
+             var s = document.getElementsByTagName("script")[0]; 
+             s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+     
+</head>
+
+  <body>
+    <header>
+      <div >
+		
+			<div id="textlogo" >
+				<h1 class="site-name"><a href="/" title="Rocko&#39;s blog">Rocko&#39;s blog</a></h1>
+				<h2 class="blog-motto"><a >Nothing for nothing</a></h2>
+			</div>
+			<div class="navbar" ><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<!-- high一下 -->
+					<li> <a title="High一下，晃一下..." href='javascript:(function() {
+	function c() {
+		var e = document.createElement("link");
+		e.setAttribute("type", "text/css");
+		e.setAttribute("rel", "stylesheet");
+		e.setAttribute("href", f);
+		e.setAttribute("class", l);
+		document.body.appendChild(e)
+	}
+ 
+	function h() {
+		var e = document.getElementsByClassName(l);
+		for (var t = 0; t < e.length; t++) {
+			document.body.removeChild(e[t])
+		}
+	}
+ 
+	function p() {
+		var e = document.createElement("div");
+		e.setAttribute("class", a);
+		document.body.appendChild(e);
+		setTimeout(function() {
+			document.body.removeChild(e)
+		}, 100)
+	}
+ 
+	function d(e) {
+		return {
+			height : e.offsetHeight,
+			width : e.offsetWidth
+		}
+	}
+ 
+	function v(i) {
+		var s = d(i);
+		return s.height > e && s.height < n && s.width > t && s.width < r
+	}
+ 
+	function m(e) {
+		var t = e;
+		var n = 0;
+		while (!!t) {
+			n += t.offsetTop;
+			t = t.offsetParent
+		}
+		return n
+	}
+ 
+	function g() {
+		var e = document.documentElement;
+		if (!!window.innerWidth) {
+			return window.innerHeight
+		} else if (e && !isNaN(e.clientHeight)) {
+			return e.clientHeight
+		}
+		return 0
+	}
+ 
+	function y() {
+		if (window.pageYOffset) {
+			return window.pageYOffset
+		}
+		return Math.max(document.documentElement.scrollTop, document.body.scrollTop)
+	}
+ 
+	function E(e) {
+		var t = m(e);
+		return t >= w && t <= b + w
+	}
+ 
+	function S() {
+		var e = document.createElement("audio");
+		e.setAttribute("class", l);
+		e.src = i;
+		e.loop = false;
+		e.addEventListener("canplay", function() {
+			setTimeout(function() {
+				x(k)
+			}, 500);
+			setTimeout(function() {
+				N();
+				p();
+				for (var e = 0; e < O.length; e++) {
+					T(O[e])
+				}
+			}, 15500)
+		}, true);
+		e.addEventListener("ended", function() {
+			N();
+			h()
+		}, true);
+		e.innerHTML = " <p>If you are reading this, it is because your browser does not support the audio element. We recommend that you get a new browser.</p> <p>";
+		document.body.appendChild(e);
+		e.play()
+	}
+ 
+	function x(e) {
+		e.className += " " + s + " " + o
+	}
+ 
+	function T(e) {
+		e.className += " " + s + " " + u[Math.floor(Math.random() * u.length)]
+	}
+ 
+	function N() {
+		var e = document.getElementsByClassName(s);
+		var t = new RegExp("\\b" + s + "\\b");
+		for (var n = 0; n < e.length; ) {
+			e[n].className = e[n].className.replace(t, "")
+		}
+	}
+ 
+	var e = 30;
+	var t = 30;
+	var n = 350;
+	var r = 350;
+	var i = "http://rocko-blog.qiniudn.com/Music-Fashion_Show.mp3";
+	var s = "mw-harlem_shake_me";
+	var o = "im_first";
+	var u = ["im_drunk", "im_baked", "im_trippin", "im_blown"];
+	var a = "mw-strobe_light";
+	var f = "//s3.amazonaws.com/moovweb-marketing/playground/harlem-shake-style.css";
+	var l = "mw_added_css";
+	var b = g();
+	var w = y();
+	var C = document.getElementsByTagName("*");
+	var k = null;
+	for (var L = 0; L < C.length; L++) {
+		var A = C[L];
+		if (v(A)) {
+			if (E(A)) {
+				k = A;
+				break
+			}
+		}
+	}
+	if (A === null) {
+		console.warn("Could not find a node of the right size. Please try a different page.");
+		return
+	}
+	c();
+	S();
+	var O = [];
+	for (var L = 0; L < C.length; L++) {
+		var A = C[L];
+		if (v(A)) {
+			O.push(A)
+		}
+	}
+})()    '>High一下</a> 
+					
+				
+					</li>
+					<!-- 搜索框 -->
+					<li>
+					
+					<form class="search" action="/search/index.html" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" autocomplete="off" name="q" maxlength="20" placeholder="谷歌站内搜索" />
+					</form>
+					
+					</li>
+					
+				</ul>
+                            </nav>			
+							
+							
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/14/运算符的几点/" title="运算符的几点" itemprop="url">运算符的几点</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://zhengxiaopeng.com" title="Rocko">Rocko</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2015-01-14T04:06:58.000Z" itemprop="datePublished">1月 14 2015</time>
+    更新日期:<time datetime="2015-01-23T03:04:36.000Z" itemprop="dateModified">1月 23 2015</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目录</strong>
+		<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#开篇废话"><span class="toc-number">1.</span> <span class="toc-text">开篇废话</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#^_按位异或"><span class="toc-number">2.</span> <span class="toc-text">^ 按位异或</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#不用第三个临时变量交换两个数的值"><span class="toc-number">2.1.</span> <span class="toc-text">不用第三个临时变量交换两个数的值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#<<、>>_按位左移、右移"><span class="toc-number">3.</span> <span class="toc-text"><<、>> 按位左移、右移</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#将一个数乘于2的n次方a*(2n)"><span class="toc-number">3.0.1.</span> <span class="toc-text">将一个数乘于2的n次方a*(2n)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#将一个数除以2的n次方a/(2n)"><span class="toc-number">3.0.2.</span> <span class="toc-text">将一个数除以2的n次方a/(2n)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2的n次方"><span class="toc-number">3.0.3.</span> <span class="toc-text">2的n次方</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#&_按位与"><span class="toc-number">4.</span> <span class="toc-text">& 按位与</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#判断一个数的奇偶"><span class="toc-number">4.0.1.</span> <span class="toc-text">判断一个数的奇偶</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#对2n取余"><span class="toc-number">4.0.2.</span> <span class="toc-text">对2n取余</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#END"><span class="toc-number">5.</span> <span class="toc-text">END</span></a></li></ol>
+		</div>
+		
+		<h2 id="开篇废话">开篇废话</h2>
+<p>运算符使用的几点小技巧，先给出<a href="http://www.w3cschool.cc/java/java-operators.html" target="_blank" rel="external">Java的运算符的基本知识</a>复习下，其它语言的大同小异。运算符需要注意的问题有：<em>优先级（运算顺序问题）、结合方向（自左至右或自右至左问题）、要求运算对象个数（运算符需要有几个运算对象问题）</em>。<br>合理运用运算符能提高自己代码的BIG、能精简代码、还能提高程序的运行效率，滥用运算符可能导致逻辑混乱、代码不知所云什么的，所以有些问题还是要自己注意一下的。下面就列出一些运算符的使用技巧，换一换思路看下，当然还有先占着这个坑，以后会补(man)上(man)更(lai)新(ba)。</p>
+<h2 id="^_按位异或">^ 按位异或</h2>
+<h3 id="不用第三个临时变量交换两个数的值">不用第三个临时变量交换两个数的值</h3>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span>(String[] args) {</div><div class="line">	<span class="keyword">int</span> a = <span class="number">2</span>; <span class="comment">// int a = -2;</span></div><div class="line">	<span class="keyword">int</span> b = <span class="number">3</span>;</div><div class="line">	<span class="comment">/* 总的来说就是先找出两个数上位值不同的位置置1其余0,然后将得到的新值分别和a、b的原值异或 */</span></div><div class="line">	a ^= b; <span class="comment">// a = a ^ b;</span></div><div class="line">	b ^= a; <span class="comment">// b = a ^ b;</span></div><div class="line">	a ^= b; <span class="comment">// a = a ^ b;  </span></div><div class="line"></div><div class="line">	System.out.printf(<span class="string">"交换后: a=%s, b=%s"</span>, a, b);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+
+
+<h2 id="&lt;&lt;、&gt;&gt;_按位左移、右移">&lt;&lt;、&gt;&gt; 按位左移、右移</h2>
+<h4 id="将一个数乘于2的n次方a*(2n)">将一个数乘于2的n次方a*(2<sup>n</sup>)</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> a = <span class="number">2</span>;</div><div class="line"><span class="keyword">int</span> n = <span class="number">3</span>; <span class="comment">// n=1, 左移一位就是乘于2</span></div><div class="line">a &lt;&lt;= n; <span class="comment">// a = a &lt;&lt; n;</span></div><div class="line">System.out.println(<span class="string">"a*(2^n) = "</span> + a);</div></pre></td></tr></table></figure>
+
+<h4 id="将一个数除以2的n次方a/(2n)">将一个数除以2的n次方a/(2<sup>n</sup>)</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> a = <span class="number">32</span>;</div><div class="line"><span class="keyword">int</span> n = <span class="number">3</span>; <span class="comment">//n=1, 右移一位就是除于2</span></div><div class="line">a &gt;&gt;= n; <span class="comment">// a = a &gt;&gt; n;</span></div><div class="line">System.out.println(<span class="string">"a/(2^n) = "</span> + a);</div></pre></td></tr></table></figure>
+
+
+<h4 id="2的n次方">2的n次方</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> n = <span class="number">3</span>; <span class="comment">// int n = 0;</span></div><div class="line"><span class="keyword">int</span> result = <span class="number">2</span> &lt;&lt; (n - <span class="number">1</span>);</div><div class="line">System.out.println(<span class="string">"2^n = "</span> + result);</div></pre></td></tr></table></figure>
+
+<h2 id="&amp;_按位与">&amp; 按位与</h2>
+<h4 id="判断一个数的奇偶">判断一个数的奇偶</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> a = <span class="number">3</span>;</div><div class="line"><span class="keyword">boolean</span> bl = (a & <span class="number">1</span>) == <span class="number">1</span>;</div><div class="line">System.out.println(<span class="string">"a为奇数? "</span> + bl);</div></pre></td></tr></table></figure>
+
+<h4 id="对2n取余">对2<sup>n</sup>取余</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> n = <span class="number">2</span> &lt;&lt; <span class="number">2</span>; <span class="comment">// 2的3次方</span></div><div class="line"><span class="keyword">int</span> value = <span class="number">2</span>;</div><div class="line"><span class="comment">// 如果是2的幂，n一定是100... n-1就是1111...所以做与运算结果保留m在n范围的非0的位</span></div><div class="line"><span class="keyword">int</span> result = value & (n - <span class="number">1</span>);</div><div class="line">System.out.println(<span class="string">"2对8取余接结果  = "</span> + result);</div></pre></td></tr></table></figure>
+
+<p>HashMap的table的大小(HashMap的优化是把hash表的大小设置为2<sup>n</sup>的)和确定元素的存放位置即table表中的位置(<code>indexFor(int h, int length)</code>方法)也是运用了这一原理，HashMap相关代码如下：</p>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="javadoc">/**</span></div><div class="line"> * The table, resized as necessary. Length MUST Always be a power of two.</div><div class="line"> */</div><div class="line"><span class="keyword">transient</span> Entry&lt;K,V&gt;[] table = (Entry&lt;K,V&gt;[]) EMPTY_TABLE;  </div><div class="line">......</div><div class="line"><span class="javadoc">/**</span></div><div class="line"> * Returns index for hash code h.</div><div class="line"> */</div><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> indexFor(<span class="keyword">int</span> h, <span class="keyword">int</span> length) {</div><div class="line">    <span class="comment">// assert Integer.bitCount(length) == 1 : "length must be a non-zero power of 2";</span></div><div class="line">    <span class="keyword">return</span> h & (length-<span class="number">1</span>);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>HashMap中<code>hash(Object k)</code>函数也运用了int类型(4个字节32位)数据的按位右移补零（&gt;&gt;&gt;）和异或（^）运算加入了高位计算，防止低位不变，高位变化时，造成的hash冲突也就是要使得高位对其结果也产生影响：</p>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// This function ensures that hashCodes that differ only by</span></div><div class="line"><span class="comment">// constant multiples at each bit position have a bounded</span></div><div class="line"><span class="comment">// number of collisions (approximately 8 at default load factor).</span></div><div class="line">h ^= (h &gt;&gt;&gt; <span class="number">20</span>) ^ (h &gt;&gt;&gt; <span class="number">12</span>);</div><div class="line"><span class="keyword">return</span> h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>);</div></pre></td></tr></table></figure>
+
+<h2 id="END">END</h2>
+<p>参考文章：<br><a href="http://blog.csdn.net/zmazon/article/details/8262185" target="_blank" rel="external">优秀程序员不得不知道的20个位运算技巧</a><br><a href="http://geeklu.com/2010/07/java-hashmap/" target="_blank" rel="external">Java HashMap 核心源码解读</a><br><a href="http://jinguo.iteye.com/blog/540150" target="_blank" rel="external">JAVA移位运算符</a></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/运算符/">运算符</a><a href="/tags/技巧/">技巧</a>
+  </div>
+
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/Programming/">Programming</a>
+</div>
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://zhengxiaopeng.com/2015/01/14/运算符的几点/" data-title="运算符的几点 | Rocko&#39;s blog" data-tsina="asd" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2015/02/02/使用Gradle发布项目到JCenter仓库/" title="使用Gradle发布项目到JCenter仓库">
+  <strong>PREVIOUS:</strong><br/>
+  <span>
+  使用Gradle发布项目到JCenter仓库</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/12/13/Android-Studio-jar、so、library项目依赖/"  title="Android Studio jar、so、library项目依赖">
+ <strong>NEXT:</strong><br/> 
+ <span>Android Studio jar、so、library项目依赖
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+<section class="comment">
+	<div class="ds-thread" data-thread-key="2015/01/14/运算符的几点/-运算符的几点" data-title="运算符的几点" data-url="http://zhengxiaopeng.com/2015/01/14/运算符的几点/"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"Rocko"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+
+</section>
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目录</strong>
+  <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#开篇废话"><span class="toc-number">1.</span> <span class="toc-text">开篇废话</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#^_按位异或"><span class="toc-number">2.</span> <span class="toc-text">^ 按位异或</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#不用第三个临时变量交换两个数的值"><span class="toc-number">2.1.</span> <span class="toc-text">不用第三个临时变量交换两个数的值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#<<、>>_按位左移、右移"><span class="toc-number">3.</span> <span class="toc-text"><<、>> 按位左移、右移</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#将一个数乘于2的n次方a*(2n)"><span class="toc-number">3.0.1.</span> <span class="toc-text">将一个数乘于2的n次方a*(2n)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#将一个数除以2的n次方a/(2n)"><span class="toc-number">3.0.2.</span> <span class="toc-text">将一个数除以2的n次方a/(2n)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2的n次方"><span class="toc-number">3.0.3.</span> <span class="toc-text">2的n次方</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#&_按位与"><span class="toc-number">4.</span> <span class="toc-text">& 按位与</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#判断一个数的奇偶"><span class="toc-number">4.0.1.</span> <span class="toc-text">判断一个数的奇偶</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#对2n取余"><span class="toc-number">4.0.2.</span> <span class="toc-text">对2n取余</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#END"><span class="toc-number">5.</span> <span class="toc-text">END</span></a></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+<div id="authorInfo">
+	
+		<div class="author-logo"></div>		
+	
+	<div class="social-list" class="clearfix">
+		
+		<a href="http://weibo.com/678662430" target="_blank" title="weibo"></a>
+		
+		
+		
+		<a href="https://github.com/zhengxiaopeng" target="_blank" title="github"></a>
+		
+		
+		<a href="https://www.facebook.com/zhengxiaopeng.china" target="_blank" title="facebook"></a>
+		
+		
+	</div>
+</div>
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+			<li><a href="/categories/Android/" title="Android">Android<sup>3</sup></a></li>
+		
+			<li><a href="/categories/Git/" title="Git">Git<sup>1</sup></a></li>
+		
+			<li><a href="/categories/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		
+			<li><a href="/categories/Programming/" title="Programming">Programming<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			<li><a href="/tags/Android-Studio/" title="Android Studio">Android Studio<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Git/" title="Git">Git<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Hexo/" title="Hexo">Hexo<sup>2</sup></a></li>
+		
+			<li><a href="/tags/JCenter/" title="JCenter">JCenter<sup>1</sup></a></li>
+		
+			<li><a href="/tags/Volley/" title="Volley">Volley<sup>1</sup></a></li>
+		
+			<li><a href="/tags/域名/" title="域名">域名<sup>1</sup></a></li>
+		
+			<li><a href="/tags/技巧/" title="技巧">技巧<sup>1</sup></a></li>
+		
+			<li><a href="/tags/运算符/" title="运算符">运算符<sup>1</sup></a></li>
+		
+			<li><a href="/tags/错误/" title="错误">错误<sup>1</sup></a></li>
+		
+		</ul>
+</div>
+
+
+  
+  <div class="tagcloudlist">
+    <p class="asidetitle">标签云</p>
+    <div class="tagcloudlist clearfix">
+       <a href="/tags/Android-Studio/" style="font-size: 10.00px;">Android Studio</a><a href="/tags/Git/" style="font-size: 10.00px;">Git</a><a href="/tags/Hexo/" style="font-size: 20.00px;">Hexo</a><a href="/tags/JCenter/" style="font-size: 10.00px;">JCenter</a><a href="/tags/Volley/" style="font-size: 10.00px;">Volley</a><a href="/tags/域名/" style="font-size: 10.00px;">域名</a><a href="/tags/技巧/" style="font-size: 10.00px;">技巧</a><a href="/tags/运算符/" style="font-size: 10.00px;">运算符</a><a href="/tags/错误/" style="font-size: 10.00px;">错误</a>
+    </div>
+  </div>
+
+
+  <div class="linkslist">
+  <p class="asidetitle">友情链接</p>
+    <ul>
+	  <li><a href="http://blog.csdn.net/bbld_/" target="_britt" title="http://blog.csdn.net/bbld_/">我的CSDN博客</a></li>
+	  <li><a href="http://brittyu.com" target="_britt" title="http://brittyu.com">Brittyu</a></li>
+    </ul>
+</div>
+
+
+  <div class="permission">
+  <p class="asidetitle">内容许可</p>
+	<ul>
+	  <li><a href="http://creativecommons.org/licenses/by-sa/3.0/cn/" target="_britt" title="http://creativecommons.org/licenses/by-sa/3.0/cn/">除特别说明外，用户内容均采用 知识共享署名-相同方式共享 3.0 中国大陆许可协议 进行许可。</a></li>
+    </ul>
+</div>
+
+  <div class="rsspart" style="margin-top:5px;">
+	<a href="/atom.xml" target="_blank" title="RSS订阅">RSS 订阅</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+    
+            <p class="copyright"> © 2015 
+		
+		Rocko
+		
+            </div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+<script type="text/javascript">
+  var duoshuoQuery = {short_name:"Rocko"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+</script> 
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<script>
+    
+        var _bdImg = '2';
+    
+    window._bd_share_config={
+        "common":{
+            "bdSnsKey":{
+
+            },
+            "bdText":"",
+            "bdMini":"2",
+            "bdMiniList":[
+                "qzone",
+                "tsina",
+                "weixin",
+                "renren",
+                "tqq",
+                "tieba",
+                "douban",
+                "sqq",
+                "diandian",
+                "huaban",
+                "youdao",
+                "mail",
+                "ty",
+                "fbook",
+                "twi",
+                "linkedin",
+                "copy",
+                "print"
+            ],
+            "bdPic":"",
+            "bdStyle":"0",
+            "bdSize":"16"
+        },
+        "slide":{
+            "type":"slide",
+            "bdImg":_bdImg,
+            "bdPos":"right",
+            "bdTop":"350"
+        },
+        "image":{
+            "viewList":[
+                "weixin",
+                "qzone",
+                "tsina",
+                "renren",
+                "douban",
+                "tqq"
+            ],
+            "viewText":"分享：",
+            "viewSize":"16"
+        },
+        "selectShare":{
+            "bdContainerClass":null,
+            "bdSelectMiniList":[
+                "weixin",
+                "qzone",
+                "tsina",
+                "renren",
+                "douban",
+                "tqq"
+            ]
+        }
+    };
+    with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+
+
+
+<div id="totop" style="position:fixed;bottom:15px;right:15px;cursor: pointer;">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+<script src="/js/totop.js"></script>
+
+  </body>
+</html>
+
+

@@ -1,0 +1,887 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[Rocko's blog]]></title>
+  <subtitle><![CDATA[Nothing for nothing]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://zhengxiaopeng.com/"/>
+  <updated>2015-02-02T16:24:13.588Z</updated>
+  <id>http://zhengxiaopeng.com/</id>
+  
+  <author>
+    <name><![CDATA[Rocko]]></name>
+    <email><![CDATA[zhengxiaopeng.china@gmail.com]]></email>
+  </author>
+  
+  <generator uri="http://zespia.tw/hexo/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[使用Gradle发布项目到JCenter仓库]]></title>
+    <link href="http://zhengxiaopeng.com/2015/02/02/%E4%BD%BF%E7%94%A8Gradle%E5%8F%91%E5%B8%83%E9%A1%B9%E7%9B%AE%E5%88%B0JCenter%E4%BB%93%E5%BA%93/"/>
+    <id>http://zhengxiaopeng.com/2015/02/02/使用Gradle发布项目到JCenter仓库/</id>
+    <published>2015-02-02T13:32:49.000Z</published>
+    <updated>2015-02-02T16:20:51.000Z</updated>
+    <content type="html"><![CDATA[<p>这篇文章介绍通过Gradle把开源项目发布到公共仓库JCenter中，方便你我他的事情，我们都是很懒的嘛。JCenter现在是Android Studio中repositories的默认节点了，之前是Maven的，不过JCenter是兼容Maven的，所以放心使用。步骤基本是按<a href="https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/" target="_blank" rel="external">Publishing Gradle Android Library to jCenter Repository</a>这里来的，英文能看的直接看这篇也行。下面我的步骤正式开始，发布到JCenter仓库的是我的项目：<a href="https://github.com/zhengxiaopeng/BounceProgressBar" target="_blank" rel="external">BounceProgressBar</a>。</p>
+<h2 id="申请Bintray账号">申请Bintray账号</h2>
+<p>Bintray的基本功能类似于Maven Central，一样的我们需要一个账号，<a href="https://bintray.com/" target="_blank" rel="external">Bintray传送门</a>，注册完成后第一步算完成了。</p>
+<h2 id="生成项目的JavaDoc和source_JARs">生成项目的JavaDoc和source JARs</h2>
+<p>简单的说生成的这两样东西就是我们在下一步中上传到远程仓库JCenter上的文件了。这一步需要<code>android-maven-plugin</code>插件，所以我们需要在项目的build.gradle（Top-level build file，项目最外层的build.gradle文件）中添加这个构建依赖，如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">buildscript</span> {</div><div class="line">    <span class="keyword">repositories</span> {</div><div class="line">        jcenter()</div><div class="line">    }</div><div class="line">    <span class="keyword">dependencies</span> {</div><div class="line">        <span class="keyword">classpath</span> <span class="string">'com.android.tools.build:gradle:1.0.0'</span></div><div class="line">        <span class="keyword">classpath</span> <span class="string">'com.github.dcendents:android-maven-plugin:1.2'</span></div><div class="line">        <span class="comment">// NOTE: Do not place your application dependencies here; they belong</span></div><div class="line">        <span class="comment">// in the individual module build.gradle files</span></div><div class="line">    }</div><div class="line">}</div><div class="line"><span class="keyword">allprojects</span> {</div><div class="line">    <span class="keyword">repositories</span> {</div><div class="line">        jcenter()</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>然后在你需要发布的那个module（我这里的即是library）的build.gradle里配置如下内容：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div></pre></td><td class="code"><pre><div class="line">apply plugin: <span class="string">'com.android.library'</span></div><div class="line">apply plugin: <span class="string">'com.github.dcendents.android-maven'</span></div><div class="line">apply plugin: <span class="string">'com.jfrog.bintray'</span></div><div class="line"><span class="comment">// This is the library version used when deploying the artifact</span></div><div class="line">version = <span class="string">"1.0.0"</span></div><div class="line">android {</div><div class="line">    compileSdkVersion <span class="number">21</span></div><div class="line">    buildToolsVersion <span class="string">"21.1.2"</span></div><div class="line">    resourcePrefix <span class="string">"bounceprogressbar__"</span>	<span class="comment">//这个随便填</span></div><div class="line">    defaultConfig {</div><div class="line">        minSdkVersion <span class="number">9</span></div><div class="line">        targetSdkVersion <span class="number">21</span></div><div class="line">        versionCode <span class="number">1</span></div><div class="line">        versionName version</div><div class="line">    }</div><div class="line">    buildTypes {</div><div class="line">        release {</div><div class="line">            minifyEnabled <span class="keyword">false</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="string">'proguard-android.txt'</span>), <span class="string">'proguard-rules.pro'</span></div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div><div class="line"><span class="keyword">dependencies</span> {</div><div class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">'libs'</span>, <span class="keyword">include</span>: [<span class="string">'*.jar'</span>])</div><div class="line">    <span class="keyword">compile</span> <span class="string">'com.nineoldandroids:library:2.4.0+'</span></div><div class="line">}</div><div class="line"><span class="keyword">def</span> siteUrl = <span class="string">'https://github.com/zhengxiaopeng/BounceProgressBar'</span>      <span class="comment">// 项目的主页</span></div><div class="line"><span class="keyword">def</span> gitUrl = <span class="string">'https://github.com/zhengxiaopeng/BounceProgressBar.git'</span>   <span class="comment">// Git仓库的url</span></div><div class="line"><span class="keyword">group</span> = <span class="string">"org.rocko.bpb"</span>                                        <span class="comment">// Maven Group ID for the artifact，一般填你唯一的包名</span></div><div class="line">install {</div><div class="line">    <span class="keyword">repositories</span>.mavenInstaller {</div><div class="line">        <span class="comment">// This generates POM.xml with proper parameters</span></div><div class="line">        pom {</div><div class="line">            <span class="keyword">project</span> {</div><div class="line">                packaging <span class="string">'aar'</span></div><div class="line">                <span class="comment">// Add your description here</span></div><div class="line">                name <span class="string">'Android BounceProgressBar Widget'</span> 	<span class="comment">//项目描述</span></div><div class="line">                url siteUrl</div><div class="line">                <span class="comment">// Set your license</span></div><div class="line">                licenses {</div><div class="line">                    license {</div><div class="line">                        name <span class="string">'The Apache Software License, Version 2.0'</span></div><div class="line">                        url <span class="string">'http://www.apache.org/licenses/LICENSE-2.0.txt'</span></div><div class="line">                    }</div><div class="line">                }</div><div class="line">                developers {</div><div class="line">                    developer {</div><div class="line">                        id <span class="string">'zhengxiaopeng'</span>		<span class="comment">//填写的一些基本信息</span></div><div class="line">                        name <span class="string">'Rocko'</span></div><div class="line">                        email <span class="string">'zhengxiaopeng.china@gmail.com'</span></div><div class="line">                    }</div><div class="line">                }</div><div class="line">                scm {</div><div class="line">                    connection gitUrl</div><div class="line">                    developerConnection gitUrl</div><div class="line">                    url siteUrl</div><div class="line">                }</div><div class="line">            }</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div><div class="line"><span class="keyword">task</span> sourcesJar(type: Jar) {</div><div class="line">    <span class="keyword">from</span> android.<span class="keyword">sourceSets</span>.main.java.srcDirs</div><div class="line">    classifier = <span class="string">'sources'</span></div><div class="line">}</div><div class="line"><span class="keyword">task</span> javadoc(type: Javadoc) {</div><div class="line">    <span class="keyword">source</span> = android.<span class="keyword">sourceSets</span>.main.java.srcDirs</div><div class="line">    <span class="keyword">classpath</span> += <span class="keyword">project</span>.files(android.getBootClasspath().<span class="keyword">join</span>(<span class="keyword">File</span>.pathSeparator))</div><div class="line">}</div><div class="line"><span class="keyword">task</span> javadocJar(type: Jar, dependsOn: javadoc) {</div><div class="line">    classifier = <span class="string">'javadoc'</span></div><div class="line">    <span class="keyword">from</span> javadoc.<span class="keyword">destinationDir</span></div><div class="line">}</div><div class="line"><span class="keyword">artifacts</span> {</div><div class="line">    archives javadocJar</div><div class="line">    archives sourcesJar</div><div class="line">}</div><div class="line">Properties properties = <span class="keyword">new</span> Properties()</div><div class="line">properties.load(<span class="keyword">project</span>.rootProject.<span class="keyword">file</span>(<span class="string">'local.properties'</span>).newDataInputStream())</div><div class="line">bintray {</div><div class="line">    user = properties.getProperty(<span class="string">"bintray.user"</span>)</div><div class="line">    key = properties.getProperty(<span class="string">"bintray.apikey"</span>)</div><div class="line">    <span class="keyword">configurations</span> = [<span class="string">'archives'</span>]</div><div class="line">    pkg {</div><div class="line">        repo = <span class="string">"maven"</span>		</div><div class="line">        name = <span class="string">"BounceProgressBar"</span>	<span class="comment">//发布到JCenter上的项目名字</span></div><div class="line">        websiteUrl = siteUrl</div><div class="line">        vcsUrl = gitUrl</div><div class="line">        licenses = [<span class="string">"Apache-2.0"</span>]</div><div class="line">        publish = <span class="keyword">true</span></div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>配置好上述后需要在你的项目的根目录上的<code>local.properties</code>文件里（一般这文件需gitignore，防止泄露账户信息）配置你的bintray账号信息，<em>your_user_name</em>为你的用户名，<em>your_apikey</em>为你的账户的apikey，可以点击进入你的账户信息里再点击<code>Edit</code>即有查看API Key的选项，把他复制下来。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">bintray.<span class="variable">user=</span>your_user_name</div><div class="line">bintray.<span class="variable">apikey=</span>your_apikey</div></pre></td></tr></table></figure>
+
+<p>Rebuild一下项目，顺利的话，就可以在module里的build文件夹里生成相关文件了。这一步为止，就可以把你项目生成到本地的仓库中了，Android Studio中默认即在<code>Android\sdk\extras\android\m2repository</code>这里，所以我们可以通过如下命令(Windows中，可能还需要下载一遍Gradle，之后就不需要了)执行生成:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gradlew install</div></pre></td></tr></table></figure>
+
+<h2 id="上传到Bintray">上传到Bintray</h2>
+<p>上传到Bintray需要<code>gradle-bintray-plugin</code>的支持，所以在最外层的build.gradle里添加构建依赖：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">buildscript</span> {</div><div class="line">    <span class="keyword">repositories</span> {</div><div class="line">        jcenter()</div><div class="line">    }</div><div class="line">    <span class="keyword">dependencies</span> {</div><div class="line">        <span class="keyword">classpath</span> <span class="string">'com.android.tools.build:gradle:1.0.0'</span></div><div class="line">        <span class="keyword">classpath</span> <span class="string">'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'</span></div><div class="line">        <span class="keyword">classpath</span> <span class="string">'com.github.dcendents:android-maven-plugin:1.2'</span></div><div class="line">        <span class="comment">// NOTE: Do not place your application dependencies here; they belong</span></div><div class="line">        <span class="comment">// in the individual module build.gradle files</span></div><div class="line">    }</div><div class="line">}</div><div class="line"><span class="keyword">allprojects</span> {</div><div class="line">    <span class="keyword">repositories</span> {</div><div class="line">        jcenter()</div><div class="line">    }</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>Rebuild一下，然后执行如下命令(Windows中)完成上传：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gradlew bintrayUpload</div></pre></td></tr></table></figure>
+
+<p>`<br>上传完成即可在Bintray网站上找到你的Repo，我们需要完成最后一步工作，申请你的Repo添加到JCenter。可以<a href="https://bintray.com/bintray/jcenter" target="_blank" rel="external">进入这个页面</a>,输入你的项目名字点击匹配到的项目，然后写一写Comments再send即可，然后就等管理员批准了，我是大概等了40分钟，然后网站上会给你一条通过信息，然后就OK了，大功告成。<br><img src="http://rocko-blog.qiniudn.com/使用Gradle发布项目到JCenter仓库_1.png" alt=""><br>成功后就可以在其它项目里方便的使用你发布的项目了：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">dependencies</span> {</div><div class="line">    <span class="keyword">compile</span> <span class="string">'org.rocko.bpb:library:1.0.0'</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h2 id="End">End</h2>
+<p>不明白的可以再看看这两篇文章或者留言。   </p>
+<p>相关文章：<br><a href="http://blog.csdn.net/maosidiaoxian/article/details/43148643" target="_blank" rel="external">使用Gradle发布Android开源项目到JCenter</a><br><a href="https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/" target="_blank" rel="external">Publishing Gradle Android Library to jCenter Repository</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>这篇文章介绍通过Gradle把开源项目发布到公共仓库JCenter中，方便你我他的事情，我们都是很懒的嘛。JCenter现在是Android Studio中repositories的默认节点了，之前是Maven的，不过JCenter是兼容Maven的，所以放心使用。步骤基本]]>
+    </summary>
+    
+      <category term="JCenter" scheme="http://zhengxiaopeng.com/tags/JCenter/"/>
+    
+      <category term="Android" scheme="http://zhengxiaopeng.com/categories/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[运算符的几点]]></title>
+    <link href="http://zhengxiaopeng.com/2015/01/14/%E8%BF%90%E7%AE%97%E7%AC%A6%E7%9A%84%E5%87%A0%E7%82%B9/"/>
+    <id>http://zhengxiaopeng.com/2015/01/14/运算符的几点/</id>
+    <published>2015-01-14T04:06:58.000Z</published>
+    <updated>2015-01-23T03:04:36.000Z</updated>
+    <content type="html"><![CDATA[<h2 id="开篇废话">开篇废话</h2>
+<p>运算符使用的几点小技巧，先给出<a href="http://www.w3cschool.cc/java/java-operators.html" target="_blank" rel="external">Java的运算符的基本知识</a>复习下，其它语言的大同小异。运算符需要注意的问题有：<em>优先级（运算顺序问题）、结合方向（自左至右或自右至左问题）、要求运算对象个数（运算符需要有几个运算对象问题）</em>。<br>合理运用运算符能提高自己代码的BIG、能精简代码、还能提高程序的运行效率，滥用运算符可能导致逻辑混乱、代码不知所云什么的，所以有些问题还是要自己注意一下的。下面就列出一些运算符的使用技巧，换一换思路看下，当然还有先占着这个坑，以后会补(man)上(man)更(lai)新(ba)。</p>
+<h2 id="^_按位异或">^ 按位异或</h2>
+<h3 id="不用第三个临时变量交换两个数的值">不用第三个临时变量交换两个数的值</h3>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span>(String[] args) {</div><div class="line">	<span class="keyword">int</span> a = <span class="number">2</span>; <span class="comment">// int a = -2;</span></div><div class="line">	<span class="keyword">int</span> b = <span class="number">3</span>;</div><div class="line">	<span class="comment">/* 总的来说就是先找出两个数上位值不同的位置置1其余0,然后将得到的新值分别和a、b的原值异或 */</span></div><div class="line">	a ^= b; <span class="comment">// a = a ^ b;</span></div><div class="line">	b ^= a; <span class="comment">// b = a ^ b;</span></div><div class="line">	a ^= b; <span class="comment">// a = a ^ b;  </span></div><div class="line"></div><div class="line">	System.out.printf(<span class="string">"交换后: a=%s, b=%s"</span>, a, b);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+
+
+<h2 id="&lt;&lt;、&gt;&gt;_按位左移、右移">&lt;&lt;、&gt;&gt; 按位左移、右移</h2>
+<h4 id="将一个数乘于2的n次方a*(2n)">将一个数乘于2的n次方a*(2<sup>n</sup>)</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> a = <span class="number">2</span>;</div><div class="line"><span class="keyword">int</span> n = <span class="number">3</span>; <span class="comment">// n=1, 左移一位就是乘于2</span></div><div class="line">a &lt;&lt;= n; <span class="comment">// a = a &lt;&lt; n;</span></div><div class="line">System.out.println(<span class="string">"a*(2^n) = "</span> + a);</div></pre></td></tr></table></figure>
+
+<h4 id="将一个数除以2的n次方a/(2n)">将一个数除以2的n次方a/(2<sup>n</sup>)</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> a = <span class="number">32</span>;</div><div class="line"><span class="keyword">int</span> n = <span class="number">3</span>; <span class="comment">//n=1, 右移一位就是除于2</span></div><div class="line">a &gt;&gt;= n; <span class="comment">// a = a &gt;&gt; n;</span></div><div class="line">System.out.println(<span class="string">"a/(2^n) = "</span> + a);</div></pre></td></tr></table></figure>
+
+
+<h4 id="2的n次方">2的n次方</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> n = <span class="number">3</span>; <span class="comment">// int n = 0;</span></div><div class="line"><span class="keyword">int</span> result = <span class="number">2</span> &lt;&lt; (n - <span class="number">1</span>);</div><div class="line">System.out.println(<span class="string">"2^n = "</span> + result);</div></pre></td></tr></table></figure>
+
+<h2 id="&amp;_按位与">&amp; 按位与</h2>
+<h4 id="判断一个数的奇偶">判断一个数的奇偶</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> a = <span class="number">3</span>;</div><div class="line"><span class="keyword">boolean</span> bl = (a & <span class="number">1</span>) == <span class="number">1</span>;</div><div class="line">System.out.println(<span class="string">"a为奇数? "</span> + bl);</div></pre></td></tr></table></figure>
+
+<h4 id="对2n取余">对2<sup>n</sup>取余</h4>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> n = <span class="number">2</span> &lt;&lt; <span class="number">2</span>; <span class="comment">// 2的3次方</span></div><div class="line"><span class="keyword">int</span> value = <span class="number">2</span>;</div><div class="line"><span class="comment">// 如果是2的幂，n一定是100... n-1就是1111...所以做与运算结果保留m在n范围的非0的位</span></div><div class="line"><span class="keyword">int</span> result = value & (n - <span class="number">1</span>);</div><div class="line">System.out.println(<span class="string">"2对8取余接结果  = "</span> + result);</div></pre></td></tr></table></figure>
+
+<p>HashMap的table的大小(HashMap的优化是把hash表的大小设置为2<sup>n</sup>的)和确定元素的存放位置即table表中的位置(<code>indexFor(int h, int length)</code>方法)也是运用了这一原理，HashMap相关代码如下：</p>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="javadoc">/**</span></div><div class="line"> * The table, resized as necessary. Length MUST Always be a power of two.</div><div class="line"> */</div><div class="line"><span class="keyword">transient</span> Entry&lt;K,V&gt;[] table = (Entry&lt;K,V&gt;[]) EMPTY_TABLE;  </div><div class="line">......</div><div class="line"><span class="javadoc">/**</span></div><div class="line"> * Returns index for hash code h.</div><div class="line"> */</div><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> indexFor(<span class="keyword">int</span> h, <span class="keyword">int</span> length) {</div><div class="line">    <span class="comment">// assert Integer.bitCount(length) == 1 : "length must be a non-zero power of 2";</span></div><div class="line">    <span class="keyword">return</span> h & (length-<span class="number">1</span>);</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>HashMap中<code>hash(Object k)</code>函数也运用了int类型(4个字节32位)数据的按位右移补零（&gt;&gt;&gt;）和异或（^）运算加入了高位计算，防止低位不变，高位变化时，造成的hash冲突也就是要使得高位对其结果也产生影响：</p>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// This function ensures that hashCodes that differ only by</span></div><div class="line"><span class="comment">// constant multiples at each bit position have a bounded</span></div><div class="line"><span class="comment">// number of collisions (approximately 8 at default load factor).</span></div><div class="line">h ^= (h &gt;&gt;&gt; <span class="number">20</span>) ^ (h &gt;&gt;&gt; <span class="number">12</span>);</div><div class="line"><span class="keyword">return</span> h ^ (h &gt;&gt;&gt; <span class="number">7</span>) ^ (h &gt;&gt;&gt; <span class="number">4</span>);</div></pre></td></tr></table></figure>
+
+<h2 id="END">END</h2>
+<p>参考文章：<br><a href="http://blog.csdn.net/zmazon/article/details/8262185" target="_blank" rel="external">优秀程序员不得不知道的20个位运算技巧</a><br><a href="http://geeklu.com/2010/07/java-hashmap/" target="_blank" rel="external">Java HashMap 核心源码解读</a><br><a href="http://jinguo.iteye.com/blog/540150" target="_blank" rel="external">JAVA移位运算符</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h2 id="开篇废话">开篇废话</h2>
+<p>运算符使用的几点小技巧，先给出<a href="http://www.w3cschool.cc/java/java-operators.html" target="_blank" rel="external">Java的运算符]]>
+    </summary>
+    
+      <category term="运算符" scheme="http://zhengxiaopeng.com/tags/%E8%BF%90%E7%AE%97%E7%AC%A6/"/>
+    
+      <category term="技巧" scheme="http://zhengxiaopeng.com/tags/%E6%8A%80%E5%B7%A7/"/>
+    
+      <category term="Programming" scheme="http://zhengxiaopeng.com/categories/Programming/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Android Studio jar、so、library项目依赖]]></title>
+    <link href="http://zhengxiaopeng.com/2014/12/13/Android-Studio-jar%E3%80%81so%E3%80%81library%E9%A1%B9%E7%9B%AE%E4%BE%9D%E8%B5%96/"/>
+    <id>http://zhengxiaopeng.com/2014/12/13/Android-Studio-jar、so、library项目依赖/</id>
+    <published>2014-12-13T02:50:28.000Z</published>
+    <updated>2015-01-23T03:04:36.000Z</updated>
+    <content type="html"><![CDATA[<h1 id="前言">前言</h1>
+<p>Android Studio(以下简称AS)在13年I/O大会后放出预览版到现在放出的正式版1.0（PS.今天又更新到1.0.1了）历时一年多了，虽然Google官方推出的Android开发者的IDE对我们Android DEV是很有吸引力的，但考虑到beta版还是太多问题所以自己主要还是把AS当做尝鲜为主，每放出一个较大更新就下载下来试试，感觉还是挺好的，渐渐用AS的人越来越多，Github上的项目也基本是AS的了，Google的sample也采用AS，所以使用Eclipse跟外界交流越来越困难啊。到现在<code>android-studio-bundle-135.1629389</code>AS正式版的推出，我们有理由从Eclipse迁移到AS了。<br>要迁移到AS中开发那么要掌握AS中的项目管理是必须的，基本的new project、run什么的就不提了，这篇文章记录我在AS中在项目中解决jar包、library项目依赖、so动态链接库的问题，版本控制Git、SVN等这篇文章不涉及。这么多废话后下面开始。</p>
+<h1 id="Eclipse跟AS的不同">Eclipse跟AS的不同</h1>
+<p>从Eclipse到AS不要带着在Eclipse中的主观色彩去在AS中使用，从项目的构成到构建是不同的，下面列举在Eclipse和AS中的一些概念的区别：   </p>
+<h2 id="WorkSpace和Project">WorkSpace和Project</h2>
+<p>Eclipse的WorkSpace和AS的Project说的可以说是一个东西，也就是说你可以把在AS中的Project理解为WorkSpace。<br><img src="http://7sblw9.com1.z0.glb.clouddn.com/Android-Studio-jar、so、library项目依赖_1.jpg?imageView2/2/w/400/h/400/q/100" alt=""> 所以你在AS中new一个Project相当于在Eclipse中重开了一个WorkSpace，注意第一个箭头，显示模式为Project，建议刚用AS时用这种，方便了解里面的文件结构。</p>
+<h2 id="Project和Module">Project和Module</h2>
+<p>跟上面一样，Eclipse中的一个个project也就是相当于AS中的一个个module。上图的module_1和module_2就是我们习惯的eclipse中的一堆project了，把显示模式换为Android之后就更为直观了：<br><img src="http://7sblw9.com1.z0.glb.clouddn.com/Android-Studio-jar、so、library项目依赖_2.jpg?imageView2/2/w/400/h/400/q/100" alt=""><br>最下面的就是<code>AS</code>中整个Project中所有Gradle的配置了，当然包括所有module的配置了，括号的名字就表示build.gradle对应的配置对象。</p>
+<h2 id="Properties和Module_Setting">Properties和Module Setting</h2>
+<p>Eclipse中的Properties也是跟AS的Module Setting对应的<br><img src="http://7sblw9.com1.z0.glb.clouddn.com/Android-Studio-jar、so、library项目依赖_3.jpg?imageView2/2/w/700/h/700/q/100" alt=""><br>可以看到这里可以像在Eclipse的Properties中一样在这里配置一些东西，比如在Module Setting里给Module添加依赖(dependencies)信息也是可以的，并且可以直接搜maven的项目依赖。</p>
+<h1 id="jar">jar</h1>
+<p>明白了上面的三点就可以很快上手了。首先就来说最简单的添加jar包。  </p>
+<ul>
+<li>可以跟在Eclipse中一样，把jar包往<code>Module</code>里扔，再在jar右键add as library就可以了，然后最后在你的Module文件夹（像上面的module_1）右键make module一下就可以在代码里用jar里的东西了。  </li>
+<li>也可以自己手动到module里的build.gradle里添加dependencies，上面的方法做的方法本质上就是这种。</li>
+</ul>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">dependencies</span> {</div><div class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">'libs'</span>, <span class="keyword">include</span>: [<span class="string">'*.jar'</span>])</div><div class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">'D:\\repositories\\libs\\java'</span>, <span class="keyword">include</span>: [<span class="string">'*.jar'</span>])</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>dir可以是电脑上的目录文件。</p>
+<h1 id="library项目">library项目</h1>
+<p>有了前面跟Eclipse的比较后，类似地像在Eclipse中添加项目依赖一样，被依赖的项目得是作为library。在Eclipse中我们是进入到Properties把这个项目设置为library（as a library），所以在AS中也是类似的，我们需要把一个module作为library(这个module可以自己新建module也可以导入module，此外我们是可以把一个AS的Project导进成module的或者直接导Project里的单个module也可以)，完成后到这个module（我这里是把module_2作为library）把<code>apply plugin: &#39;com.android.application&#39;</code>改为<code>apply plugin: &#39;com.android.library&#39;</code>再然后去掉（删除）module_2的build.gradle里的<code>applicationId &quot;com.example.mrzheng.as&quot;</code>(一个library不需要这个，不然make project或make module时会报错)。<br><em>build.gradle(module_2)</em></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">apply plugin: <span class="string">'com.android.library'</span></div><div class="line">android {</div><div class="line">    compileSdkVersion <span class="number">21</span></div><div class="line">    buildToolsVersion <span class="string">"21.1.1"</span></div><div class="line">    defaultConfig {</div><div class="line">        minSdkVersion <span class="number">10</span></div><div class="line">        targetSdkVersion <span class="number">21</span></div><div class="line">        versionCode <span class="number">1</span></div><div class="line">        versionName <span class="string">"1.0"</span></div><div class="line">    }</div><div class="line">    buildTypes {</div><div class="line">        release {</div><div class="line">            minifyEnabled <span class="keyword">false</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="string">'proguard-android.txt'</span>), <span class="string">'proguard-rules.pro'</span></div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div><div class="line"><span class="keyword">dependencies</span> {</div><div class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">'libs'</span>, <span class="keyword">include</span>: [<span class="string">'*.jar'</span>])</div><div class="line">    <span class="keyword">compile</span> <span class="string">'com.android.support:appcompat-v7:21.0.2'</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>到这里先确认下你的project(AS)的settings.gradle里有没把module都include进去,没有的话加上：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">include</span> <span class="string">':module_1'</span>, <span class="string">':module_2'</span></div></pre></td></tr></table></figure>
+
+<p>最后就可以在module_1里就添加library依赖(module_2)了。进入module_1的build.gradle，找到dependencies加上<code>compile project(&#39;:module_2&#39;)</code><br><em>build.gradle(module_1)</em></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">apply plugin: <span class="string">'com.android.application'</span></div><div class="line">android {</div><div class="line">    compileSdkVersion <span class="number">21</span></div><div class="line">    buildToolsVersion <span class="string">"21.1.1"</span></div><div class="line">    defaultConfig {</div><div class="line">        applicationId <span class="string">"com.example.mrzheng.as"</span></div><div class="line">        minSdkVersion <span class="number">10</span></div><div class="line">        targetSdkVersion <span class="number">21</span></div><div class="line">        versionCode <span class="number">1</span></div><div class="line">        versionName <span class="string">"1.0"</span></div><div class="line">    }	</div><div class="line">    buildTypes {</div><div class="line">        release {</div><div class="line">            minifyEnabled <span class="keyword">false</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="string">'proguard-android.txt'</span>), <span class="string">'proguard-rules.pro'</span></div><div class="line">        }</div><div class="line">    }</div><div class="line">    <span class="keyword">sourceSets</span> {</div><div class="line">        main {</div><div class="line">            jniLibs.srcDirs = [<span class="string">'libs'</span>]</div><div class="line">        }</div><div class="line">    }	</div><div class="line">}</div><div class="line"><span class="keyword">dependencies</span> {</div><div class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">'libs'</span>, <span class="keyword">include</span>: [<span class="string">'*.jar'</span>])</div><div class="line">    <span class="keyword">compile</span> <span class="keyword">fileTree</span>(dir: <span class="string">'D:\\repositories\\libs\\java'</span>, <span class="keyword">include</span>: [<span class="string">'*.jar'</span>])</div><div class="line">    <span class="keyword">compile</span> <span class="string">'com.android.support:appcompat-v7:21.0.2'</span></div><div class="line">    <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':module_2'</span>)</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>现在make module一下就可以使用依赖的项目了(module_2)。</p>
+<h1 id="so">so</h1>
+<p>之前的版本不知道怎么样，现在正式版的AS添加so打包进apk里的lib里是很简单的，我们只需要把so文件放到libs文件夹里的对应cpu文件夹里，最后在module的build.gradle里加上jni的sourceSets配置：<code>jniLibs.srcDirs = [&#39;libs&#39;]</code>，完整代码看上面的<em>build.gradle(module_1)</em>代码片。<br><img src="http://7sblw9.com1.z0.glb.clouddn.com/Android-Studio-jar、so、library项目依赖_4.jpg?imageView2/2/w/400/h/400/q/100" alt=""></p>
+<h1 id="END">END</h1>
+<p>做完上面的工作，jar包、so动态链接库、library依赖项目里的代码就都可以正常工作了，正常的项目开发已经没什么问题。最后给上本博文的源码：<a href="http://download.csdn.net/detail/bbld_/8255385" target="_blank" rel="external">Android Studio jar、so、library项目依赖</a>，导进AS里后，run module_1即可。<br>最最后奉上Android Studio快捷键大全（大部分来源于：<a href="http://ask.android-studio.org/?/article/12" target="_blank" rel="external">http://ask.android-studio.org/?/article/12</a>）：  </p>
+<h1 id="附录（IDEA(Android_Studio)_快捷键）">附录（IDEA(Android Studio) 快捷键）</h1>
+<p>说明：斜体文字表示，测试时没有效果或者没有测试时没有达到预先条件的情况下没有效果。</p>
+<h2 id="IDE">IDE</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>帮助</td>
+</tr>
+<tr>
+<td>Alt+F1</td>
+<td>查找文件所在目录位置</td>
+</tr>
+<tr>
+<td>Alt+1</td>
+<td>快速打开或隐藏工程面板</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+S</td>
+<td>打开设置对话框</td>
+</tr>
+<tr>
+<td>Alt+Home</td>
+<td>跳转到导航栏</td>
+</tr>
+<tr>
+<td>Esc</td>
+<td>光标返回编辑框</td>
+</tr>
+<tr>
+<td>Shift+Esc</td>
+<td>光标返回编辑框,关闭无用的窗口</td>
+</tr>
+<tr>
+<td>Shift+Click</td>
+<td>关闭标签页</td>
+</tr>
+<tr>
+<td>F12</td>
+<td>把焦点从编辑器移到最近使用的工具窗口</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Y</td>
+<td>同步</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+S</td>
+<td>打开设置对话框</td>
+</tr>
+<tr>
+<td>Alt+Shift+Inert</td>
+<td>开启/关闭列选择模式</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Shift+S</td>
+<td>打开当前项目/模块属性</td>
+</tr>
+<tr>
+<td>Alt+Shift+C</td>
+<td>查看文件的变更历史</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+F10</td>
+<td>运行</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+F9</td>
+<td>debug运行</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+F12</td>
+<td>资源管理器打开文件夹</td>
+</tr>
+</tbody>
+</table>
+<h2 id="编辑">编辑</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl+C</td>
+<td>复制当前行或选中的内容</td>
+</tr>
+<tr>
+<td>Ctrl+D</td>
+<td>粘贴当前行或选中的内容</td>
+</tr>
+<tr>
+<td>Ctrl+X</td>
+<td>剪切当前行或选中的内容</td>
+</tr>
+<tr>
+<td>Ctrl+Y</td>
+<td>删除行</td>
+</tr>
+<tr>
+<td>Ctrl+Z</td>
+<td>倒退</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Z</td>
+<td>向前</td>
+</tr>
+<tr>
+<td>Alt+Enter</td>
+<td>自动修正</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+L</td>
+<td>格式化代码</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+I</td>
+<td>将选中的代码进行自动缩进编排</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+O</td>
+<td>优化导入的类和包</td>
+</tr>
+<tr>
+<td>Alt+Insert</td>
+<td>得到一些Intention Action，可以生成构造器、Getter、Setter、将 <code>==</code> 改为 <code>equals()</code> 等</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+V</td>
+<td>选最近使用的剪贴板内容并插入</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Shift+V</td>
+<td>简单粘贴</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Insert</td>
+<td>选最近使用的剪贴板内容并插入（同Ctrl+Shift+V）</td>
+</tr>
+<tr>
+<td>Ctrl+Enter</td>
+<td>在当前行的上面插入新行，并移动光标到新行（此功能光标在行首时有效）</td>
+</tr>
+<tr>
+<td>Shift+Enter</td>
+<td>在当前行的下面插入新行，并移动光标到新行</td>
+</tr>
+<tr>
+<td>Ctrl+J</td>
+<td>自动代码</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+T</td>
+<td>把选中的代码放在 <code>try{}</code> 、<code>if{}</code> 、 <code>else{}</code> 里</td>
+</tr>
+<tr>
+<td>Shift+Alt+Insert</td>
+<td>竖编辑模式</td>
+</tr>
+<tr>
+<td>Ctrl+ <code>/</code></td>
+<td>注释 <code>//</code> </td>
+</tr>
+<tr>
+<td>Ctrl+Shift+ <code>/</code></td>
+<td>注释 <code>/*...*/</code></td>
+</tr>
+<tr>
+<td>Ctrl+Shift+J</td>
+<td>合并成一行</td>
+</tr>
+<tr>
+<td>F2/Shift+F2</td>
+<td>跳转到下/上一个错误语句处</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Back</td>
+<td>跳转到上次编辑的地方</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Space</td>
+<td>类名自动完成</td>
+</tr>
+<tr>
+<td>Shift+Alt+Up/Down</td>
+<td>内容向上/下移动</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Up/Down</td>
+<td>语句向上/下移动</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+U</td>
+<td>大小写切换</td>
+</tr>
+<tr>
+<td>Tab</td>
+<td>代码标签输入完成后，按 <code>Tab</code>，生成代码</td>
+</tr>
+<tr>
+<td>Ctrl+Backspace</td>
+<td>按单词删除</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Enter</td>
+<td>语句完成</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+J</td>
+<td>用动态模板环绕</td>
+</tr>
+</tbody>
+</table>
+<h2 id="文件">文件</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl+F12</td>
+<td>显示当前文件的结构</td>
+</tr>
+<tr>
+<td>Ctrl+H</td>
+<td>显示类继承结构图</td>
+</tr>
+<tr>
+<td>Ctrl+Q</td>
+<td>显示注释文档</td>
+</tr>
+<tr>
+<td>Ctrl+P</td>
+<td>方法参数提示</td>
+</tr>
+<tr>
+<td>Ctrl+U</td>
+<td>打开当前类的父类或者实现的接口</td>
+</tr>
+<tr>
+<td>Alt+Left/Right</td>
+<td>切换代码视图</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Left/Right</td>
+<td>返回上次编辑的位置</td>
+</tr>
+<tr>
+<td>Alt+Up/Down</td>
+<td>在方法间快速移动定位</td>
+</tr>
+<tr>
+<td>Ctrl+B</td>
+<td>快速打开光标处的类或方法</td>
+</tr>
+<tr>
+<td>Ctrl+W</td>
+<td>选中代码，连续按会有其他效果</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+W</td>
+<td>取消选择光标所在词</td>
+</tr>
+<tr>
+<td>Ctrl+ <code>-</code> / <code>+</code></td>
+<td>折叠/展开代码</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+ <code>-</code> / <code>+</code></td>
+<td>折叠/展开全部代码</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+<code>.</code></td>
+<td>折叠/展开当前花括号中的代码</td>
+</tr>
+<tr>
+<td>Ctrl+ <code>]</code> / <code>[</code></td>
+<td>跳转到代码块结束/开始处</td>
+</tr>
+<tr>
+<td>F2 或 Shift+F2</td>
+<td>高亮错误或警告快速定位</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+C</td>
+<td>复制路径</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Shift+C</td>
+<td>复制引用，必须选择类名</td>
+</tr>
+<tr>
+<td>Alt+Up/Down</td>
+<td>在方法间快速移动定位</td>
+</tr>
+<tr>
+<td>Shift+F1</td>
+<td>要打开编辑器光标字符处使用的类或者方法 <code>Java</code> 文档的浏览器</td>
+</tr>
+<tr>
+<td>Ctrl+G</td>
+<td>定位行</td>
+</tr>
+</tbody>
+</table>
+<h2 id="查找">查找</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl+F</td>
+<td>在当前窗口查找文本</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+F</td>
+<td>在指定环境下查找文本</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>向下查找关键字出现位置</td>
+</tr>
+<tr>
+<td>Shift+F3</td>
+<td>向上一个关键字出现位置</td>
+</tr>
+<tr>
+<td>Ctrl+R</td>
+<td>在当前窗口替换文本</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+R</td>
+<td>在指定窗口替换文本</td>
+</tr>
+<tr>
+<td>Ctrl+N</td>
+<td>查找类</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+N</td>
+<td>查找文件</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Alt+N</td>
+<td>查找项目中的方法或变量</td>
+</tr>
+<tr>
+<td>Ctrl+B</td>
+<td>查找变量的来源</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+B</td>
+<td>快速打开光标处的类或方法</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+B</td>
+<td>跳转到类或方法实现处</td>
+</tr>
+<tr>
+<td>Ctrl+E</td>
+<td>最近打开的文件</td>
+</tr>
+<tr>
+<td>Alt+F3</td>
+<td>快速查找，效果和Ctrl+F相同</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>跳转至定义变量的位置</td>
+</tr>
+<tr>
+<td>Alt+F7</td>
+<td>查询当前元素在工程中的引用</td>
+</tr>
+<tr>
+<td>Ctrl+F7</td>
+<td>查询当前元素在当前文件中的引用，然后按 <code>F3</code> 可以选择</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+F7</td>
+<td>选中查询当前元素在工程中的引用</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+F7</td>
+<td>高亮显示匹配的字符，按 <code>Esc</code> 高亮消失</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+F7</td>
+<td>查找某个方法的所有调用地方</td>
+</tr>
+<tr>
+<td>Ctrl+Shift+Alt+N</td>
+<td>查找类中的方法或变量</td>
+</tr>
+<tr>
+<td><em>Ctrl+Shift+O</em></td>
+<td><em>弹出显示查找内容</em></td>
+</tr>
+<tr>
+<td><em>Ctrl+Alt+Up/Down</em></td>
+<td><em>快速跳转搜索结果</em>   </td>
+</tr>
+<tr>
+<td><em>Ctrl+Shift+S</em></td>
+<td><em>高级搜索、搜索结构</em></td>
+</tr>
+</tbody>
+</table>
+<h2 id="重构">重构</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F5</td>
+<td>复制</td>
+</tr>
+<tr>
+<td>F6</td>
+<td>移动</td>
+</tr>
+<tr>
+<td>Alt+Delete</td>
+<td>安全删除</td>
+</tr>
+<tr>
+<td>Ctrl+U</td>
+<td>转到父类</td>
+</tr>
+<tr>
+<td>Ctrl+O</td>
+<td>重写父类的方法</td>
+</tr>
+<tr>
+<td>Ctrl+I</td>
+<td>实现方法</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+N</td>
+<td>内联</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Shift+T</td>
+<td>弹出重构菜单</td>
+</tr>
+<tr>
+<td>Shift+F6</td>
+<td>重构-重命名</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+M</td>
+<td>提取代码组成方法</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+C</td>
+<td>将变量更改为常量</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+V</td>
+<td>定义变量引用当前对象或者方法的返回值</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+F</td>
+<td>将局部变量更改为类的成员变量</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+P</td>
+<td>将变量更改为方法的参数</td>
+</tr>
+</tbody>
+</table>
+<h2 id="调试">调试</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F8</td>
+<td>跳到下一步</td>
+</tr>
+<tr>
+<td>Shift+F8</td>
+<td>跳出函数、跳到下一个断点</td>
+</tr>
+<tr>
+<td>Alt+Shift+F8</td>
+<td>强制跳出函数</td>
+</tr>
+<tr>
+<td>F7</td>
+<td>进入代码</td>
+</tr>
+<tr>
+<td>Shift+F7</td>
+<td>智能进入代码</td>
+</tr>
+<tr>
+<td>Alt+Shift+F7</td>
+<td>强制进入代码</td>
+</tr>
+<tr>
+<td>Alt+F9</td>
+<td>运行至光标处</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+F9</td>
+<td>强制运行至光标处</td>
+</tr>
+<tr>
+<td>Ctrl+F2</td>
+<td>停止运行</td>
+</tr>
+<tr>
+<td>Alt+F8</td>
+<td>计算变量值</td>
+</tr>
+</tbody>
+</table>
+<h2 id="VCS">VCS</h2>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Alt+ <code>~</code></td>
+<td><code>VCS</code> 操作菜单</td>
+</tr>
+<tr>
+<td>Ctrl+K</td>
+<td>提交更改</td>
+</tr>
+<tr>
+<td>Ctrl+T</td>
+<td>更新项目</td>
+</tr>
+<tr>
+<td>Ctrl+Alt+Shift+D</td>
+<td>显示变化</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="前言">前言</h1>
+<p>Android Studio(以下简称AS)在13年I/O大会后放出预览版到现在放出的正式版1.0（PS.今天又更新到1.0.1了）历时一年多了，虽然Google官方推出的Android开发者的IDE对我们Android DEV是很有]]>
+    </summary>
+    
+      <category term="Android Studio" scheme="http://zhengxiaopeng.com/tags/Android-Studio/"/>
+    
+      <category term="Android" scheme="http://zhengxiaopeng.com/categories/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[设置域名邮箱]]></title>
+    <link href="http://zhengxiaopeng.com/2014/12/06/%E8%AE%BE%E7%BD%AE%E5%9F%9F%E5%90%8D%E9%82%AE%E7%AE%B1/"/>
+    <id>http://zhengxiaopeng.com/2014/12/06/设置域名邮箱/</id>
+    <published>2014-12-06T04:49:07.000Z</published>
+    <updated>2015-01-23T03:04:36.000Z</updated>
+    <content type="html"><![CDATA[<h1 id="前提">前提</h1>
+<p>首先你得有自己的域名…</p>
+<h1 id="操作">操作</h1>
+<p>自己喜欢选一个提供域名邮箱服务的邮箱，如qq、163等，设置内容都是大同小异照着来设置就好,我是选了qq邮箱的，所以下面的是在qq邮箱里设置域名邮箱的流程。</p>
+<h2 id="创建域名邮箱">创建域名邮箱</h2>
+<p>在qq邮箱的设置里，点击账户按钮，向下滚找到域名邮箱然后点击管理域名邮箱，或者<a href="http://domain.mail.qq.com/" target="_blank" rel="external">直接点击这里</a>。<br><strong>来到创建域名邮箱页面</strong>，如下，填写后下一步：<br><img src="http://rocko-blog.qiniudn.com/设置域名邮箱_1.jpg?imageView2/2/w/600/h/600/q/100" alt=""><br><strong>选择你的域名提供商</strong><br><img src="http://rocko-blog.qiniudn.com/设置域名邮箱_2.jpg?imageView2/2/w/600/h/600/q/100" alt=""><br>下一步来到域名验证和MX记录设置，我们需要先登录到<code>DNS解析服务商</code>,我的是国内的DNSPOD，所以我需要登录DNSPOD的管理页面不需要登录我购买域名的godaddy了。如果你在godaddy里购买的域名且没有更改过域名解析商的话那就是用godaddy默认的解析服务，然后你需要登录到godaddy里去设置。这一步“请验证域名的所有权并设置MX记录”,qq的页面上的教程是在godaddy里设置的，就不说在godaddy的设置了，下面是DNSPOD里的操作。<br><strong>来到DNSPOD的域名管理页面，添加CNAME记录并保存</strong><br><img src="http://rocko-blog.qiniudn.com/设置域名邮箱_3.jpg?imageView2/2/w/600/h/600/q/100" alt=""><br><strong>再添加MX记录</strong>，方法也是新建记录只不过选项不同而已，按照下面图片的内容填写即可<br><img src="http://rocko-blog.qiniudn.com/设置域名邮箱_4.jpg?imageView2/2/w/600/h/600/q/100" alt=""><br>完成后来到qq的页面里点击<code>提交验证</code>即可(可能会有延迟，失败的话过几分钟再试试),成功后跳转到如下页面：<br><img src="http://rocko-blog.qiniudn.com/设置域名邮箱_5.jpg?imageView2/2/w/600/h/600/q/100" alt=""><br>然后点击管理添加成员并设置它的账号，一般都首先设置自己的qq号并设置为管理员账号，然后我们把qq的收发账号设置为刚刚添加的账号就算完成了（这个设置也是在qq账户设置里，找到默认发信账号后切换账号即可），整个流程也是不麻烦，最后我们就可以愉快的用自己的域名邮箱收发邮件了。<br><img src="http://rocko-blog.qiniudn.com/设置域名邮箱_6.jpg?imageView2/2/w/600/h/600/q/100" alt=""></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="前提">前提</h1>
+<p>首先你得有自己的域名…</p>
+<h1 id="操作">操作</h1>
+<p>自己喜欢选一个提供域名邮箱服务的邮箱，如qq、163等，设置内容都是大同小异照着来设置就好,我是选了qq邮箱的，所以下面的是在qq邮箱里设置域名邮箱的流程。]]>
+    </summary>
+    
+      <category term="Hexo" scheme="http://zhengxiaopeng.com/tags/Hexo/"/>
+    
+      <category term="域名" scheme="http://zhengxiaopeng.com/tags/%E5%9F%9F%E5%90%8D/"/>
+    
+      <category term="Hexo" scheme="http://zhengxiaopeng.com/categories/Hexo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Android Volley自定义Request(JacksonRequest、GsonRequest)]]></title>
+    <link href="http://zhengxiaopeng.com/2014/12/05/Android-Volley%E8%87%AA%E5%AE%9A%E4%B9%89Request-JacksonRequest%E3%80%81GsonRequest/"/>
+    <id>http://zhengxiaopeng.com/2014/12/05/Android-Volley自定义Request-JacksonRequest、GsonRequest/</id>
+    <published>2014-12-05T14:55:31.000Z</published>
+    <updated>2015-01-23T03:04:36.000Z</updated>
+    <content type="html"><![CDATA[<h1 id="前言">前言</h1>
+<p>Volley是一个强大的HTTP库，让Android的的网络操作变得容易、高效、快速。在少数据的高并发情况下它的优势很明显，但在大文件的上传或者下载操作中就并不适用了，这种情况下是建议使用传统方式或者其它框架来实现的。<br><em>它的优点再罗列如下：</em></p>
+<blockquote>
+<ul>
+<li>自动管理网络请求</li>
+<li>多并发的网络连接</li>
+<li>通过标准的HTTP cache coherence(高速缓存一致性)使得磁盘与内存缓存不可见(Transparent)</li>
+<li>支持指定请求的优先级</li>
+<li>支持取消已经发出的请求。你可以取消单个请求，也可以设置请求取消的块或范围</li>
+<li>框架是容易被定制的，例如，重试或者回退功能</li>
+<li>强大的指令使得你可以容易地去异步网络操作和(网络获取数据后)的UI设置</li>
+<li>(内置)Debugging和tracing工具</li>
+</ul>
+</blockquote>
+<h1 id="自定义Request实现">自定义Request实现</h1>
+<p>上面提到的优点：Volley是容易被定制的，它的易扩展性在这里的自定义Request实现中就很好的体现了出来。自定义Request是通过继承Volley中最核心的Request类来实现的。在我们的Request来解析json数据时，注意处理复杂json数据的解析可扩展性。比如，我们一般都需要把JSON数据解析成我们的实体对象，如下面使用示例中的Weather对象，如果我们的实体比较复杂时就需要自定义自己的Type去给Jackson、Gson去处理了，不然一般都会默认的给解析成HashMap式的键值对造成FC或者get不到属性。对于Jackson，使用Jackson库里的<code>TypeReference</code>类来实现；对于Gson，使用Gson库中的<code>TypeToken</code>类来实现。</p>
+<h2 id="JacksonRequest">JacksonRequest</h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JacksonRequest</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">Request</span>&lt;<span class="title">T</span>&gt; </span>{</div><div class="line"></div><div class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Listener&lt;T&gt; mListener;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</div><div class="line">	<span class="keyword">private</span> Class&lt;T&gt; mClass;</div><div class="line">	<span class="keyword">private</span> TypeReference&lt;T&gt; mTypeReference;<span class="comment">//提供和解析自定义的复杂JSON数据支持</span></div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">JacksonRequest</span>(<span class="keyword">int</span> method, String url, Class&lt;T&gt; clazz, Listener&lt;T&gt; listener,</div><div class="line">			ErrorListener errorListener) {</div><div class="line">		<span class="keyword">super</span>(method, url, errorListener);</div><div class="line">		mClass = clazz;</div><div class="line">		mListener = listener;</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">JacksonRequest</span>(<span class="keyword">int</span> method, String url, TypeReference&lt;T&gt; typeReference, Listener&lt;T&gt; listener,</div><div class="line">			ErrorListener errorListener) {</div><div class="line">		<span class="keyword">super</span>(method, url, errorListener);</div><div class="line">		mTypeReference = typeReference;</div><div class="line">		mListener = listener;</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">JacksonRequest</span>(String url, Class&lt;T&gt; clazz, Listener&lt;T&gt; listener, ErrorListener errorListener) {</div><div class="line">		<span class="keyword">this</span>(Method.GET, url, clazz, listener, errorListener);</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">JacksonRequest</span>(String url, TypeReference&lt;T&gt; typeReference, Listener&lt;T&gt; listener,</div><div class="line">			ErrorListener errorListener) {</div><div class="line">		<span class="keyword">super</span>(Method.GET, url, errorListener);</div><div class="line">		mTypeReference = typeReference;</div><div class="line">		mListener = listener;</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="annotation">@Override</span></div><div class="line">	<span class="keyword">protected</span> Response&lt;T&gt; <span class="title">parseNetworkResponse</span>(NetworkResponse response) {</div><div class="line">		<span class="keyword">try</span> {</div><div class="line">			String jsonString = <span class="keyword">new</span> String(response.data, HttpHeaderParser.parseCharset(response.headers));</div><div class="line">			<span class="keyword">if</span> (mTypeReference == <span class="keyword">null</span>)<span class="comment">//使用Jackson默认的方式解析到mClass类对象，Jackson会像HashMap那样解析</span></div><div class="line">				<span class="keyword">return</span> (Response&lt;T&gt;) Response.success(</div><div class="line">						objectMapper.readValue(jsonString, TypeFactory.rawClass(mClass)),</div><div class="line">						HttpHeaderParser.parseCacheHeaders(response));</div><div class="line">			<span class="keyword">else</span><span class="comment">//通过自己构造TypeReference让Jackson解析成自定义的对象类型</span></div><div class="line">				<span class="keyword">return</span> (Response&lt;T&gt;) Response.success(objectMapper.readValue(jsonString, mTypeReference),</div><div class="line">						HttpHeaderParser.parseCacheHeaders(response));</div><div class="line">		} <span class="keyword">catch</span> (Exception e) {</div><div class="line">			<span class="keyword">return</span> Response.error(<span class="keyword">new</span> ParseError(e));</div><div class="line">		}</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="annotation">@Override</span></div><div class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">deliverResponse</span>(T response) {</div><div class="line">		mListener.onResponse(response);</div><div class="line">	}</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<h2 id="GonRequest">GonRequest</h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GsonRequest</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">Request</span>&lt;<span class="title">T</span>&gt; </span>{</div><div class="line"></div><div class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Listener&lt;T&gt; mListener;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Gson mGson = <span class="keyword">new</span> Gson();</div><div class="line">	<span class="keyword">private</span> Class&lt;T&gt; mClass;</div><div class="line">	<span class="keyword">private</span> TypeToken&lt;T&gt; mTypeToken;<span class="comment">//提供和解析自定义的复杂JSON数据支持,这点与Jackson使用TypeReference不同，但原理是大同小异的</span></div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">GsonRequest</span>(<span class="keyword">int</span> method, String url, Class&lt;T&gt; clazz, Listener&lt;T&gt; listener,</div><div class="line">			ErrorListener errorListener) {</div><div class="line">		<span class="keyword">super</span>(method, url, errorListener);</div><div class="line">		mClass = clazz;</div><div class="line">		mListener = listener;</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">GsonRequest</span>(<span class="keyword">int</span> method, String url, TypeToken&lt;T&gt; typeToken, Listener&lt;T&gt; listener,</div><div class="line">			ErrorListener errorListener) {</div><div class="line">		<span class="keyword">super</span>(method, url, errorListener);</div><div class="line">		mTypeToken = typeToken;</div><div class="line">		mListener = listener;</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">GsonRequest</span>(String url, Class&lt;T&gt; clazz, Listener&lt;T&gt; listener, ErrorListener errorListener) {</div><div class="line">		<span class="keyword">this</span>(Method.GET, url, clazz, listener, errorListener);</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="keyword">public</span> <span class="title">GsonRequest</span>(String url, TypeToken&lt;T&gt; typeToken, Listener&lt;T&gt; listener, ErrorListener errorListener) {</div><div class="line">		<span class="keyword">super</span>(Method.GET, url, errorListener);</div><div class="line">		mTypeToken = typeToken;</div><div class="line">		mListener = listener;</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="annotation">@Override</span></div><div class="line">	<span class="keyword">protected</span> Response&lt;T&gt; <span class="title">parseNetworkResponse</span>(NetworkResponse response) {</div><div class="line">		<span class="keyword">try</span> {</div><div class="line">			String jsonString = <span class="keyword">new</span> String(response.data, HttpHeaderParser.parseCharset(response.headers));</div><div class="line">			<span class="keyword">if</span> (mTypeToken == <span class="keyword">null</span>)<span class="comment">//与Jackson类似</span></div><div class="line">				<span class="keyword">return</span> Response.success(mGson.fromJson(jsonString, mClass),</div><div class="line">						HttpHeaderParser.parseCacheHeaders(response));</div><div class="line">			<span class="keyword">else</span></div><div class="line">				<span class="keyword">return</span> (Response&lt;T&gt;) Response.success(mGson.fromJson(jsonString, mTypeToken.getType()),</div><div class="line">						HttpHeaderParser.parseCacheHeaders(response));</div><div class="line">		} <span class="keyword">catch</span> (UnsupportedEncodingException e) {</div><div class="line">			<span class="keyword">return</span> Response.error(<span class="keyword">new</span> ParseError(e));</div><div class="line">		}</div><div class="line">	}</div><div class="line">	</div><div class="line">	<span class="annotation">@Override</span></div><div class="line">	<span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">deliverResponse</span>(T response) {</div><div class="line">		mListener.onResponse(response);</div><div class="line">	}</div><div class="line">}</div></pre></td></tr></table></figure>
+
+
+<p>从上面可以看出，通过自定义Volley的Request可以很方便的设计出符合自己指定数据类型的请求类，对于一般只关心返回结果的我们直接重写<code>parseNetworkResponse()</code>方法处理返回的结果即可，如果对<code>Header</code>什么的也需要的话就重写<code>getHeader()</code>去处理。此外我写了个Volley的请求封装<a href="https://github.com/zhengxiaopeng/AndroidUtils/blob/master/AndroidUtils/src/com/roc/http/volley/VolleyRequest.java" target="_blank" rel="external">VolleyRequest</a>,代码有些长不帖上来了，大家可以点击链接看一下。现在我们可以方便的如下使用自定义的Request了，更多的用法参看<a href="https://github.com/zhengxiaopeng/AndroidUtils/blob/master/AndroidUtils/src/com/roc/http/volley/HttpVolleyTestActivity.java" target="_blank" rel="external">HttpVolleyTestActivity</a>。  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* GsonRequest */</span></div><div class="line">VolleyRequest.getInstance().newGsonRequest(<span class="string">"http://www.weather.com.cn/data/sk/101010100.html"</span>,</div><div class="line">        Weather.class, <span class="keyword">new</span> Response.Listener&lt;Weather&gt;()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span>(Weather weather)</div><div class="line">    {</div><div class="line">        WeatherInfo weatherInfo = weather.getWeatherinfo();</div><div class="line">        DebugLog.v(<span class="string">"&gt;&gt;&gt;GsonRequest: "</span>);</div><div class="line">        DebugLog.v(<span class="string">"city is "</span> + weatherInfo.getCity());</div><div class="line">        DebugLog.v(<span class="string">"temp is "</span> + weatherInfo.getTemp());</div><div class="line">        DebugLog.v(<span class="string">"time is "</span> + weatherInfo.getTime());</div><div class="line">    }</div><div class="line">}, <span class="keyword">new</span> Response.ErrorListener()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorResponse</span>(VolleyError error)</div><div class="line">    {</div><div class="line">        DebugLog.e(<span class="string">"GsonRequest: "</span> + error);</div><div class="line">    }</div><div class="line">});</div><div class="line"></div><div class="line"><span class="comment">/* JacksonRequest */</span></div><div class="line">VolleyRequest.getInstance().newJacksonRequest(<span class="string">"http://www.weather.com.cn/data/sk/101010100.html"</span>,</div><div class="line">        Weather.class, <span class="keyword">new</span> Response.Listener&lt;Weather&gt;()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span>(Weather weather)</div><div class="line">    {</div><div class="line">        WeatherInfo weatherInfo = weather.getWeatherinfo();</div><div class="line">        DebugLog.v(<span class="string">"&gt;&gt;&gt;JacksonRequest: "</span>);</div><div class="line">        DebugLog.v(<span class="string">"city is "</span> + weatherInfo.getCity());</div><div class="line">        DebugLog.v(<span class="string">"temp is "</span> + weatherInfo.getTemp());</div><div class="line">        DebugLog.v(<span class="string">"time is "</span> + weatherInfo.getTime());</div><div class="line">    }</div><div class="line">}, <span class="keyword">new</span> Response.ErrorListener()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorResponse</span>(VolleyError error)</div><div class="line">    {</div><div class="line">        DebugLog.e(<span class="string">"JacksonRequest: "</span> + error);</div><div class="line">    }</div><div class="line">});</div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>如果你的JSON需要使用自定义Type来去解析，那么你可以直接new对应的Type匿名内部类穿进去即可：<br><em>Jackson</em>  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* JacksonRequest */</span></div><div class="line">VolleyRequest.getInstance().newJacksonRequest(<span class="string">"http://www.xxx.com/xxx"</span>, <span class="keyword">new</span> TypeReference&lt;List&lt;MeteringHistoryEntity&gt;&gt;() {},</div><div class="line">List&lt;MeteringHistoryEntity&gt;{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span>(List&lt;MeteringHistoryEntity&gt; list)</div><div class="line">    {</div><div class="line">        <span class="comment">//get...</span></div><div class="line">    }</div><div class="line">}, <span class="keyword">new</span> Response.ErrorListener()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorResponse</span>(VolleyError error)</div><div class="line">    {</div><div class="line">        DebugLog.e(<span class="string">"JacksonRequest: "</span> + error);</div><div class="line">    }</div><div class="line">});</div><div class="line">}</div></pre></td></tr></table></figure>
+
+
+<p><em>Gson</em></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/* GsonRequest */</span></div><div class="line">VolleyRequest.getInstance().newGsonRequest(<span class="string">"http://www.xxx.com/xxx"</span>, <span class="keyword">new</span> TypeToken&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt;() {} .getType(),</div><div class="line"><span class="keyword">new</span> Response.Listener&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt;()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span>(List&lt;Map&lt;String, Object&gt;&gt; list)</div><div class="line">    {</div><div class="line">       <span class="comment">//get...</span></div><div class="line">    }</div><div class="line">}, <span class="keyword">new</span> Response.ErrorListener()</div><div class="line">{</div><div class="line">    <span class="annotation">@Override</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorResponse</span>(VolleyError error)</div><div class="line">    {</div><div class="line">        DebugLog.e(<span class="string">"GsonRequest: "</span> + error);</div><div class="line">    }</div><div class="line">});</div></pre></td></tr></table></figure>
+
+
+<h1 id="END">END</h1>
+<p>源码在我github上<a href="https://github.com/zhengxiaopeng/AndroidUtils" target="_blank" rel="external">AndroidUtils</a>里的<a href="https://github.com/zhengxiaopeng/AndroidUtils/tree/master/library/src/main/java/com/roc/http/volley" target="_blank" rel="external">volley包</a>里，可以下载整个项目源码来运行，或者直接看volley里的类即可。<br>以上的Request返回打印结果：<br><img src="http://rocko-blog.qiniudn.com/Android-Volley自定义Request-JacksonRequest、GsonRequest_1.jpg?imageView2/2/w/400/h/400/q/100" alt=""><br><img src="http://rocko-blog.qiniudn.com/Android-Volley自定义Request-JacksonRequest、GsonRequest_2.jpg?imageView2/2/w/400/h/400/q/100" alt="">  </p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="前言">前言</h1>
+<p>Volley是一个强大的HTTP库，让Android的的网络操作变得容易、高效、快速。在少数据的高并发情况下它的优势很明显，但在大文件的上传或者下载操作中就并不适用了，这种情况下是建议使用传统方式或者其它框架来实现的。<br><em>]]>
+    </summary>
+    
+      <category term="Volley" scheme="http://zhengxiaopeng.com/tags/Volley/"/>
+    
+      <category term="Android" scheme="http://zhengxiaopeng.com/categories/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Git 错误集锦ing...]]></title>
+    <link href="http://zhengxiaopeng.com/2014/11/25/Git-%E9%94%99%E8%AF%AF%E9%9B%86%E9%94%A6ing/"/>
+    <id>http://zhengxiaopeng.com/2014/11/25/Git-错误集锦ing/</id>
+    <published>2014-11-25T10:21:52.000Z</published>
+    <updated>2015-01-23T03:04:36.000Z</updated>
+    <content type="html"><![CDATA[<p><strong>系统环境：</strong></p>
+<p>Windows7 64位</p>
+<p><strong>问题描述：</strong></p>
+<p>Windows使用Git客户端gitscm时，当clone或commit时报错。</p>
+<p><strong>错误提示：</strong></p>
+<p><code>warning: templates not found /share/git-core/templates</code></p>
+<p><code>fatal: Unable to find remote helper for &#39;https&#39;</code></p>
+<p><strong>解决方案：</strong></p>
+<p>把Git换个安装目录重新安装问题解决!!!具体原因找了很久未明，估计不知怎么把Git搞乱了。</p>
+<hr>
+<hr>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><strong>系统环境：</strong></p>
+<p>Windows7 64位</p>
+<p><strong>问题描述：</strong></p>
+<p>Windows使用Git客户端gitscm时，当clone或commit时报错。</p>
+<p><strong>错]]>
+    </summary>
+    
+      <category term="Git" scheme="http://zhengxiaopeng.com/tags/Git/"/>
+    
+      <category term="错误" scheme="http://zhengxiaopeng.com/tags/%E9%94%99%E8%AF%AF/"/>
+    
+      <category term="Git" scheme="http://zhengxiaopeng.com/categories/Git/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Hello World]]></title>
+    <link href="http://zhengxiaopeng.com/2014/11/24/hello-world/"/>
+    <id>http://zhengxiaopeng.com/2014/11/24/hello-world/</id>
+    <published>2014-11-24T04:49:07.000Z</published>
+    <updated>2015-02-02T07:06:40.000Z</updated>
+    <content type="html"><![CDATA[<p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="http://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">trobuleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick_Start">Quick Start</h2>
+<h3 id="Create_a_new_post">Create a new post</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run_server">Run server</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate_static_files">Generate static files</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy_to_remote_sites">Deploy to remote sites</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
+
+<p>More info: <a href="http://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Welcome to <a href="http://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="http://hexo.io]]>
+    </summary>
+    
+      <category term="Hexo" scheme="http://zhengxiaopeng.com/tags/Hexo/"/>
+    
+      <category term="Hexo" scheme="http://zhengxiaopeng.com/categories/Hexo/"/>
+    
+  </entry>
+  
+</feed>
