@@ -4,7 +4,7 @@
   <subtitle><![CDATA[Nothing for nothing]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://zhengxiaopeng.com/"/>
-  <updated>2015-02-02T16:24:13.588Z</updated>
+  <updated>2015-02-05T06:59:06.574Z</updated>
   <id>http://zhengxiaopeng.com/</id>
   
   <author>
@@ -13,6 +13,145 @@
   </author>
   
   <generator uri="http://zespia.tw/hexo/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[Android 错误集锦ing...]]></title>
+    <link href="http://zhengxiaopeng.com/2015/02/05/Android-%E9%94%99%E8%AF%AF%E9%9B%86%E9%94%A6ing/"/>
+    <id>http://zhengxiaopeng.com/2015/02/05/Android-错误集锦ing/</id>
+    <published>2015-02-05T05:44:42.000Z</published>
+    <updated>2015-02-05T06:58:35.000Z</updated>
+    <content type="html"><![CDATA[<p>Fork from my csdn blog: <a href="http://blog.csdn.net/bbld_/article/details/39520249" target="_blank" rel="external">Android 错误集锦(ing…)</a>.<br>Last update time: <em>2015-2-5 13:46:03</em>.<br><br></p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>Eclipse真机无法打印log信息<br><strong>错误提示：</strong><br>…<br><strong>解决方案：</strong><br>window—&gt;show view—&gt;android-&gt;devices，打开devices，点击右边的截屏图片的按钮。等到出现截图的时候，logcat就出来信息了（不保证每次都有用）</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>xml（资源）文件里面的错误<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">android: invalid start tag xxxxx 错误原因</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>今天在学shape这个属性,结果创建的xml总是提示这个错误百思不得其解,后来找到原因了我把这个xml文件放错了位置,放到了res/layout路径下应该放在drawable的路径下才对</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>无法run(运行)工程<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Conversion to Dalvik format failed with error <span class="number">1</span></div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>第一种情况包导入错误.点击工程—&gt;build path—&gt;libraries—&gt;选中android1.x 或者android2.x ，点击remove。然后再点击add library—&gt;User Library —&gt;next—&gt;User Libraries—&gt;new 你取一个名字 比如android2.1 点击OK，选中android2.1—&gt;add jars—&gt;\android-sdk-windows\platforms\android-7\android.jar 点击打开，点击ok—&gt;finish.   </p>
+<p>第二种情况签名时没有成功。签名：java -jar signapk.jar platform.x509.pem platform.pk8 e:huaworkspace\hua\bin\hua.apk e:huaworkspace\hua\bin\hua_signaed.apk，如果hua_signaed.apk签名失败，那么请到你的工作目录中将hua_signaed.apk delete掉。   </p>
+<p>第三种情况包冲突，请到工程目录下将相同的包删除，重新导入一个，这一点和第一种情况类似，不过这是针对其他包，不是android包 </p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>导入SlidingMenu和SlidingMenu所依赖的actionbarsherlock包后再导入supportv7（用来支持ActionBar），工程一直报错、无法生成R文件。<br><strong>错误提示：</strong><br>…<br><strong>解决方案：</strong><br>不用导入v7包了，因为actionbarsherlock已经支持ActionBar，再导入v7会有冲突。</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>FragmentTransaction使用问题。<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java.lang.IllegalStateException: commit already called.</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>是因为你的ft事务是全局的变量，只能commit一次。所以用两个局部ft事务去做commit即可。 原文地址：<a href="http://blog.csdn.net/knxw0001/article/details/9363411" target="_blank" rel="external">http://blog.csdn.net/knxw0001/article/details/9363411</a><br>补充： </p>
+<figure class="highlight Java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">FragmentManager fragmentManager = getSupportFragmentManager(); </div><div class="line">FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction(); </div><div class="line">detailFragment = <span class="keyword">new</span> ProductDetailFragment(productId); </div><div class="line">commentFragment = <span class="keyword">new</span> ProductCommentFragment(productId); </div><div class="line">fragmentTransaction.add(R.id.viewgroup, detailFragment); </div><div class="line">fragmentTransaction.add(R.id.viewgroup, commentFragment); </div><div class="line">fragmentTransaction.commit(); </div><div class="line"><span class="comment">//下面这个是调用的时候需要用新的局部变量  </span></div><div class="line">getSupportFragmentManager().beginTransaction().hide(commentFragment).show(detailFragment).commit();</div></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>使用Genymotion调试出现错误INSTALL_FAILED_CPU_ABI_INCOMPATIBLE<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Installation error: INSTALL_FAILED_CPU_ABI_INCOMPATIBLE</div><div class="line">Please check logcat output <span class="keyword">for</span> more details.</div><div class="line">Launch canceled!</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>点击下载<a href="http://pan.baidu.com/s/1c0ELjzi#dir/path=%2FJustDoIt%2F%E4%B8%80%E4%BA%9B%E4%B8%8B%E8%BD%BD%E9%93%BE%E6%8E%A5%2F%E6%9C%89%E9%81%93" target="_blank" rel="external">Genymotion-ARM-Translation.zip</a><br>将你的虚拟器运行起来，将下载好的zip包用鼠标拖到虚拟机窗口中，出现确认对跨框点OK就行。然后重启你的虚拟机。</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>自定义View（RemoteViews）无法发出通知，程序报错<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">android.app.RemoteServiceException: Bad notification posted from package com.gdut.repairsystem:Couldn<span class="string">'t expand RemoteViews for: StatusBarNotification(package=com.gdut.repairsystem id=0 tag=null notification=Notification(vibrate=null,sound=null,defaults=0x0,flags=0x10))</span></div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>在自定义布局中使用了不自持的组件（这里居然是使用了自定义style的原因！！！(最外层的layout不能，里面的可以)）。</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>jni代码里：Type Method ‘NewStringUTF’ could not be resolved<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Type Method <span class="string">'NewStringUTF'</span> could not be resolved</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>点开problems窗口把这条错误删除，ok！</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>Intent使用serializable传递复杂数据时报错<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Parcelable encountered IOException writing serializable object</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>在Activity之间传递数据必须所有的内容都实现serializable接口才行。</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>Intent使用Parcelable传递复杂数据时报错<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Unmarshalling unknown <span class="built_in">type</span> code <span class="number">7471205</span> at offset <span class="number">232</span></div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>在两个activitiy之间，传递一个实现了Parcelable的ArrayList，就出现了这个错误，但是当我传递其它类型的数据时（int、String）却没有问题，显然问题出现了Parcelable身上，简单找了找答案<br><img src="http://img.blog.csdn.net/20140924103915303" alt=""></p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>使用开源控件NumberPicker，inflate时一直错误<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Android - Error inflating SimonVT NumberPicker class <span class="keyword">in</span> my layout xml</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>activity的主题的numberPickerStyle item（numberpicker的主题）要使用它项目中的主题！坑爹···</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="title">item</span> <span class="attribute">name</span>=<span class="value">"numberPickerStyle"</span>&gt;</span>@style/NPWidget.Holo.NumberPicker<span class="tag">&lt;/<span class="title">item</span>&gt;</span></div></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>使用sherlockactionbar创建searchview一直报错<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sherlockactionbar Binary XML file line <span class="comment">#29: Error inflating class</span></div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>values-v11等其它资源文件夹里不是使用sherlockactionbar的主题！！！</p>
+<hr>
+<p><strong>系统环境：</strong><br>Ubuntu12.04 64位<br><strong>问题描述：</strong><br>Android环境搭建完毕，但指定了sdk路径没问题依然报错，搭建JDK，Android环境，把android SDK复制过来后，里面的adb和其它命令的都不能使用。<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">android-sdk-linux_86/platform-tools/adb: 没有那个文件或目录。</div><div class="line">android-sdk-linux/platform-tools/adb: 没有那个文件或目录</div><div class="line">AndroidSDK/sdk/build-tools/<span class="number">19.0</span>.<span class="number">1</span>/aapt: error <span class="keyword">while</span> loading shared libraries:</div><div class="line">Failed to get the adb version: Cannot run program <span class="string">"/home/android-sdk-linux/platform-tools/adb"</span>:</div><div class="line">error=<span class="number">2</span>, 没有那个文件或目录`</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>由于是64bit的系统，而Android sdk只有32bit的程序，需要安装ia32-libs，才能使用。<br>运行如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># sudo apt-get install ia32-libs</span></div></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>SlidingMenu、ActionBarSherLock编译问题<br><strong>错误提示：</strong><br>…<br><strong>解决方案：</strong><br>1、新版的SlidingMenu-master需要使用google api编译。<br>2、SlidingMenu的library编译通过后，把编译好的ActionBarSherLock作为一个library导入SlidingMenu。<br>    导入方法是 右键-properties-android-add-选择ActionBarSherLock，因为SlidingMenu稍后也是以liberary的形式导入自己的项目中，所以此处勾选is a liberary。<br>3、新建项目，将SlidingMunu作为liberary导入，方法同上。<br>4、可能报找不到getSupportActionBar等ActionBarSherLock的方法。原因是使用ActionBarSherLock的Activity需继承于SherlockActivity，修改SlidingMenu liberary中的SlidingFragmentActivity，让它继承于SherlockFragmentActivity，重新编译liberary导入。<br>5、项目红叉或红叹号，删除support_v4包，ActionBarSherLock已包含此包，会冲突。也有可能是主题问题，注意appication theme是否正确，参照exsample。<br>6、注意把ActionBar、某些Fragment等替换成ActionBarSherLock包中的类。<br>7、左上角的指示图片是在application theme引用的style里设的。<br>8、 actionBar.setNavigationMode设置不同模式使用的监听类不同。</p>
+<hr>
+<p><strong>系统环境：</strong><br>Ubuntu12.04 64位<br><strong>问题描述：</strong><br>真机连接无法识别。<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">adb devices</div><div class="line">List of devices attached</div><div class="line">???????????? no permissions</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>1、设置usb权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$lsusb</span></div><div class="line">Bus <span class="number">005</span> Device <span class="number">001</span>: ID <span class="number">1</span>d6b:<span class="number">0001</span> Linux Foundation <span class="number">1.1</span> root hub</div><div class="line">Bus <span class="number">004</span> Device <span class="number">001</span>: ID <span class="number">1</span>d6b:<span class="number">0001</span> Linux Foundation <span class="number">1.1</span> root hub</div><div class="line">Bus <span class="number">003</span> Device <span class="number">001</span>: ID <span class="number">1</span>d6b:<span class="number">0001</span> Linux Foundation <span class="number">1.1</span> root hub</div><div class="line">Bus <span class="number">002</span> Device <span class="number">004</span>: ID <span class="number">093</span>a:<span class="number">2510</span> Pixart Imaging, Inc. Hama Optical Mouse</div><div class="line">Bus <span class="number">002</span> Device <span class="number">002</span>: ID <span class="number">413</span>c:<span class="number">2003</span> Dell Computer Corp. Keyboard</div><div class="line">Bus <span class="number">002</span> Device <span class="number">001</span>: ID <span class="number">1</span>d6b:<span class="number">0001</span> Linux Foundation <span class="number">1.1</span> root hub</div><div class="line">Bus <span class="number">001</span> Device <span class="number">022</span>: ID <span class="number">0</span>fce:<span class="number">6146</span> Sony Ericsson Mobile Communications AB </div><div class="line">Bus <span class="number">001</span> Device <span class="number">001</span>: ID <span class="number">1</span>d6b:<span class="number">0002</span> Linux Foundation <span class="number">2.0</span> root hub</div></pre></td></tr></table></figure>
+
+<p>列表中，Bus 001 Device 022: ID 0fce:6146 Sony Ericsson Mobile Communications AB. 这一行为手机的usb使用端口，记录一下，id为0fce</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">sudo</span> gedit /etc/udev/rules.d/<span class="number">70</span>-android.rules</div></pre></td></tr></table></figure>
+
+<p>加入以下内容：<br>SUBSYSTEM==”usb”, ATTRS{idVendor}==”0fce”, ATTRS{idProduct}==”6146”,MODE=”0666”<br>运行命令，重启udev：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">sudo</span> chmod a+rx /etc/udev/rules.d/<span class="number">70</span>-android.rules</div><div class="line"><span class="built_in">sudo</span> service udev restart</div></pre></td></tr></table></figure>
+
+<p>2、拔掉usb重新连上再执行：<br>//重新启动adb server</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">sudo</span> ./adb kill-server</div><div class="line">./adb devices</div><div class="line">./adb root</div></pre></td></tr></table></figure>
+
+<p>设置完成了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">adb devices</div><div class="line">List of devices attached </div><div class="line"><span class="number">434235313151564</span>C4D45    device</div></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>AndroidStudio无法更新(已加了google host)<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Connection failed. Please check your network connection and try again</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>修改安装目录下bin\studio.exe.vmoptions文件,如E:\Android\android-studio\bin\studio.exe.vmoptions，64位的还有studio64.exe.vmoptions<br>添加内容: </p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">-<span class="ruby"><span class="constant">Djava</span>.net.preferIPv4Stack=<span class="keyword">true</span> </span></div><div class="line">-<span class="ruby"><span class="constant">Didea</span>.updates.url=<span class="symbol">http:</span>/<span class="regexp">/dl.google.com/android</span><span class="regexp">/studio/patches</span><span class="regexp">/updates.xml</span></span></div><div class="line">-<span class="ruby"><span class="constant">Didea</span>.patches.url=<span class="symbol">http:</span>/<span class="regexp">/dl.google.com/android</span><span class="regexp">/studio/patches</span><span class="regexp">/</span></span></div></pre></td></tr></table></figure>
+
+<p>注意更新后这两个文件会被重新覆盖。</p>
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位<br><strong>问题描述：</strong><br>使用Jackson解析key为大写的json(复杂)数据报错<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Jackson with JSON: Unrecognized field, not marked as ignorable</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>1、给对应的解析实体类加上注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="annotation">@JsonIgnoreProperties</span>(ignoreUnknown = <span class="keyword">true</span>)</div></pre></td></tr></table></figure>
+
+<p>2、在json解析处设置属性</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ObjectMapper objectMapper = getObjectMapper();</div><div class="line">objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, <span class="keyword">false</span>);</div></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位 Android Studio 1.0.2<br><strong>问题描述：</strong><br>run项目时报错<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Error :: duplicate files during packaging of APK</div><div class="line">...</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>在出问题的module的build.gradle中的android节点加上：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">packagingOptions {</div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/DEPENDENCIES'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/LICENSE'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/LICENSE.txt'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/license.txt'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/NOTICE'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/NOTICE.txt'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/notice.txt'</span></div><div class="line">        <span class="keyword">exclude</span> <span class="string">'META-INF/ASL2.0'</span></div><div class="line">    }</div></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>系统环境：</strong><br>Windows7 64位 Android Studio 1.0.2<br><strong>问题描述：</strong><br>Android Studio导入项目后问题，无法run、rebuild等。<br><strong>错误提示：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Error:FAILURE: Build failed with an exception.</div><div class="line">* What went wrong:</div><div class="line">Task <span class="string">''</span> not found <span class="keyword">in</span> root project <span class="string">'android-project'</span>.</div><div class="line">* Try:</div><div class="line">Run gradle tasks to get a list of available tasks. Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output.</div></pre></td></tr></table></figure>
+
+<p><strong>解决方案：</strong><br>gradle tasks命令执行正常。一般都为Gradle的问题造成的。<br>从其它正常项目里复制替换掉当前项目的<code>gradlew</code>、<code>gradlew.bat</code>文件（也可自己视情况替换掉相关的gradle文件）<br>打开设置，打开Gradle选项，如图，点击使用Gradle home（你本地的Gradle目录），然后点击Apply和OK，还不行可以在Use选项中来回切换Apply一下，我就遇到点多几下才正常。。<br><img src="http://rocko-blog.qiniudn.com/Android 错误集锦ing..._1.png" alt=""></p>
+<hr>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Fork from my csdn blog: <a href="http://blog.csdn.net/bbld_/article/details/39520249" target="_blank" rel="external">Android 错误集锦(ing…)</]]>
+    </summary>
+    
+      <category term="Android" scheme="http://zhengxiaopeng.com/tags/Android/"/>
+    
+      <category term="错误" scheme="http://zhengxiaopeng.com/tags/%E9%94%99%E8%AF%AF/"/>
+    
+      <category term="Android" scheme="http://zhengxiaopeng.com/categories/Android/"/>
+    
+  </entry>
   
   <entry>
     <title><![CDATA[使用Gradle发布项目到JCenter仓库]]></title>
